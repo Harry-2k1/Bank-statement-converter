@@ -87,10 +87,12 @@ export default function FileUpload({ bankId, onBack }) {
 
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
-        justifyContent="space-between"
-        alignItems={{ xs: 'flex-start', sm: 'center' }}
         spacing={1.5}
-        sx={{ mb: 3 }}
+        sx={{
+          mb: 3,
+          justifyContent: 'space-between',
+          alignItems: { xs: 'flex-start', sm: 'center' },
+        }}
       >
         <Box>
           <Typography variant="h4" sx={{ fontSize: { xs: '1.7rem', md: '2.1rem' } }}>
@@ -179,8 +181,6 @@ export default function FileUpload({ bankId, onBack }) {
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
           spacing={2}
-          alignItems={{ xs: 'stretch', sm: 'center' }}
-          justifyContent="space-between"
           sx={{
             p: 2,
             mb: 2.5,
@@ -188,9 +188,11 @@ export default function FileUpload({ bankId, onBack }) {
             border: '1px solid',
             borderColor: 'divider',
             bgcolor: 'rgba(255,255,255,0.8)',
+            justifyContent: 'space-between',
+            alignItems: { xs: 'stretch', sm: 'center' },
           }}
         >
-          <Stack direction="row" spacing={1.5} alignItems="center" sx={{ minWidth: 0 }}>
+          <Stack direction="row" spacing={1.5} sx={{ minWidth: 0, alignItems: 'center' }}>
             <PictureAsPdfRoundedIcon color="error" />
             <Box sx={{ minWidth: 0 }}>
               <Typography noWrap fontWeight={600}>

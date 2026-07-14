@@ -4,6 +4,10 @@ import {
   parseIndianBankStatement,
   INDIAN_BANK_COLUMNS,
 } from './parsers/indianBankParser';
+import {
+  extractHdfcSummary,
+  extractIndianBankSummary,
+} from './parsers/summaryExtractor';
 import { exportTransactionsToExcel } from './excelExporter';
 
 export const BANKS = {
@@ -36,15 +40,18 @@ export async function convertStatementPdf(file, bankId) {
   let rows;
   let columns;
   let bankLabel;
+  let summaryDetails = [];
 
   if (bankId === 'hdfc') {
     rows = parseHdfcStatement(text);
     columns = HDFC_COLUMNS;
     bankLabel = BANKS.hdfc.label;
+    summaryDetails = extractHdfcSummary(text);
   } else if (bankId === 'indian') {
     rows = parseIndianBankStatement(text);
     columns = INDIAN_BANK_COLUMNS;
     bankLabel = BANKS.indian.label;
+    summaryDetails = extractIndianBankSummary(text);
   } else {
     throw new Error('Unsupported bank selected.');
   }
@@ -60,6 +67,7 @@ export async function convertStatementPdf(file, bankId) {
     columns,
     bankLabel,
     fileName: file.name,
+    summaryDetails,
   });
 
   return {
@@ -67,5 +75,6 @@ export async function convertStatementPdf(file, bankId) {
     preview: rows.slice(0, 8),
     columns,
     bankLabel,
+    summaryDetails,
   };
 }

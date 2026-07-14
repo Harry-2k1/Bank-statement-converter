@@ -1,7 +1,12 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-})
+  server: {
+    watch: {
+      // Avoid EBUSY crashes when PDFs in this folder are open/locked on Windows
+      ignored: ['**/sample statments/**', '**/sample statements/**'],
+    },
+  },
+});
