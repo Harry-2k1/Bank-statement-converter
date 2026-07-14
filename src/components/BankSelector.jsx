@@ -102,6 +102,7 @@ export default function BankSelector({ onSelect }) {
         <BankCard bank={BANKS.indian} onSelect={onSelect} />
         <BankCard bank={BANKS.kvb} onSelect={onSelect} />
         <BankCard bank={BANKS.kvbLatest} onSelect={onSelect} />
+        <BankCard bank={BANKS.axis} onSelect={onSelect} />
       </Box>
     </Box>
   );

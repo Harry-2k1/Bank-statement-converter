@@ -299,3 +299,86 @@ export function extractKvbLatestSummary(rawText) {
 
   return rows;
 }
+
+/**
+ * Extract Axis Bank statement header / account details for the Summary sheet.
+ */
+export function extractAxisSummary(rawText) {
+  const text = normalize(rawText);
+  const rows = [];
+
+  push(rows, 'Bank', 'Axis Bank');
+
+  const headerBlock = text.match(
+    /^([^\n]+)\nJoint Holder[\s\S]*?Statement of Account No\s*:\s*(\d+)/im,
+  );
+  if (headerBlock) {
+    push(rows, 'Account Holder', headerBlock[1].replace(/\s+/g, ' ').trim());
+    push(rows, 'Account No', headerBlock[2].trim());
+  } else {
+    push(rows, 'Account No', field(text, /Statement of Account No\s*:\s*(\d+)/i));
+  }
+
+  const addressBlock = text.match(
+    /Joint Holder[^\n]*\n([\s\S]*?)(?=\nSALEM\s+Customer ID|\n[A-Z ]+\s+Customer ID)/i,
+  );
+  if (addressBlock) {
+    const address = addressBlock[1]
+      .split('\n')
+      .map((l) => l.replace(/\s+/g, ' ').trim())
+      .filter(Boolean)
+      .join(', ');
+    if (address) push(rows, 'Address', address);
+  }
+
+  push(rows, 'Customer ID', field(text, /Customer ID\s*:\s*(\d+)/i));
+  push(rows, 'IFSC Code', field(text, /IFSC Code\s*:\s*([A-Z0-9]+)/i));
+  push(rows, 'MICR Code', field(text, /MICR Code\s*:\s*(\d+)/i));
+  push(rows, 'Nominee Registered', field(text, /Nominee Registered\s*:\s*([YN])/i));
+  push(rows, 'Registered Mobile No', field(text, /Registered Mobile No\s*:\s*([^\n]+)/i));
+  push(
+    rows,
+    'Registered Email ID',
+    field(text, /Registered Email ID\s*:\s*([^\n]+?)(?:\s+PAN\s*:|$)/i),
+  );
+  push(rows, 'Nominee Name', field(text, /Nominee Name\s*:\s*([^\n]+)/i));
+  push(rows, 'PAN', field(text, /PAN\s*:\s*([A-Z0-9]+)/i));
+  push(rows, 'Scheme', field(text, /Scheme\s*:\s*([^\n]+)/i));
+
+  const period = text.match(
+    /Statement of Account No\s*:\s*\d+\s+for the period\s*\(\s*From\s*:\s*([^)]+?)\s+To\s*:\s*([^)]+)\)/i,
+  );
+  if (period) {
+    push(rows, 'Statement From', period[1].trim());
+    push(rows, 'Statement To', period[2].trim());
+  }
+
+  push(
+    rows,
+    'Opening Balance',
+    field(text, /OPENING BALANCE\s+([\d,]+\.\d{2})/i),
+  );
+  push(
+    rows,
+    'Closing Balance',
+    field(text, /^CLOSING BALANCE\s+([\d,]+\.\d{2})/im),
+  );
+
+  const totals = text.match(
+    /TRANSACTION TOTAL\s+([\d,]+\.\d{2})\s+([\d,]+\.\d{2})/i,
+  );
+  if (totals) {
+    push(rows, 'Total Debit', totals[1]);
+    push(rows, 'Total Credit', totals[2]);
+  }
+
+  const branchAddress = field(
+    text,
+    /BRANCH ADDRESS\s*-\s*([\s\S]*?)(?=\+\+\+\+\s*End of Statement)/i,
+  );
+  if (branchAddress) {
+    push(rows, 'Branch Address', branchAddress.replace(/\s+/g, ' ').trim());
+  }
+
+  return rows;
+}

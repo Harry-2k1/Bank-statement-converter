@@ -9,11 +9,13 @@ import {
   parseKvbLatestStatement,
   KVB_LATEST_COLUMNS,
 } from './parsers/kvbLatestParser';
+import { parseAxisStatement, AXIS_COLUMNS } from './parsers/axisParser';
 import {
   extractHdfcSummary,
   extractIndianBankSummary,
   extractKvbSummary,
   extractKvbLatestSummary,
+  extractAxisSummary,
 } from './parsers/summaryExtractor';
 import { exportTransactionsToExcel } from './excelExporter';
 
@@ -45,6 +47,13 @@ export const BANKS = {
     short: 'KVB Latest',
     description: 'Latest KVB statement format (Txn Date / Value Date / Ref. No).',
     accent: '#A3451F',
+  },
+  axis: {
+    id: 'axis',
+    label: 'Axis Bank',
+    short: 'Axis',
+    description: 'Convert Axis Bank account statement PDFs into Excel.',
+    accent: '#97144D',
   },
 };
 
@@ -83,6 +92,11 @@ export async function convertStatementPdf(file, bankId) {
     columns = KVB_LATEST_COLUMNS;
     bankLabel = BANKS.kvbLatest.label;
     summaryDetails = extractKvbLatestSummary(text);
+  } else if (bankId === 'axis') {
+    rows = parseAxisStatement(text);
+    columns = AXIS_COLUMNS;
+    bankLabel = BANKS.axis.label;
+    summaryDetails = extractAxisSummary(text);
   } else {
     throw new Error('Unsupported bank selected.');
   }
