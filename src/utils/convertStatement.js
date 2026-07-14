@@ -4,9 +4,11 @@ import {
   parseIndianBankStatement,
   INDIAN_BANK_COLUMNS,
 } from './parsers/indianBankParser';
+import { parseKvbStatement, KVB_COLUMNS } from './parsers/kvbParser';
 import {
   extractHdfcSummary,
   extractIndianBankSummary,
+  extractKvbSummary,
 } from './parsers/summaryExtractor';
 import { exportTransactionsToExcel } from './excelExporter';
 
@@ -24,6 +26,13 @@ export const BANKS = {
     short: 'Indian Bank',
     description: 'Convert Indian Bank account statement PDFs into Excel.',
     accent: '#B71C1C',
+  },
+  kvb: {
+    id: 'kvb',
+    label: 'Karur Vysya Bank',
+    short: 'KVB',
+    description: 'Convert Karur Vysya Bank account statement PDFs into Excel.',
+    accent: '#C45C26',
   },
 };
 
@@ -52,6 +61,11 @@ export async function convertStatementPdf(file, bankId) {
     columns = INDIAN_BANK_COLUMNS;
     bankLabel = BANKS.indian.label;
     summaryDetails = extractIndianBankSummary(text);
+  } else if (bankId === 'kvb') {
+    rows = parseKvbStatement(text);
+    columns = KVB_COLUMNS;
+    bankLabel = BANKS.kvb.label;
+    summaryDetails = extractKvbSummary(text);
   } else {
     throw new Error('Unsupported bank selected.');
   }

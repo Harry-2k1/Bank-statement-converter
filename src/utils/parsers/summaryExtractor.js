@@ -159,3 +159,63 @@ export function extractHdfcSummary(rawText) {
 
   return rows;
 }
+
+/**
+ * Extract Karur Vysya Bank statement header / account details for the Summary sheet.
+ */
+export function extractKvbSummary(rawText) {
+  const text = normalize(rawText);
+  const rows = [];
+
+  push(rows, 'Bank', 'Karur Vysya Bank');
+  push(rows, 'Statement As Of', field(text, /as of[ \t]+([^\n]+)/i));
+
+  const addressBlock = text.match(
+    /as of[^\n]*\n([\s\S]*?)(?=\nAccount Name\b)/i,
+  );
+  if (addressBlock) {
+    const lines = addressBlock[1]
+      .split('\n')
+      .map((l) => l.replace(/[ \t]+/g, ' ').trim())
+      .filter(Boolean);
+    if (lines[0]) push(rows, 'Account Holder', lines[0]);
+    if (lines.length > 1) {
+      push(
+        rows,
+        'Address',
+        lines
+          .slice(1)
+          .join(', ')
+          .replace(/,\s*,/g, ',')
+          .replace(/\.\s*,/g, ',')
+          .replace(/,\s*$/g, ''),
+      );
+    }
+  }
+
+  push(rows, 'Account Name', field(text, new RegExp(`Account Name${V}`, 'i')));
+  push(
+    rows,
+    'Account Holder(s) Name',
+    field(text, new RegExp(`Account Holder\\(s\\) Name${V}`, 'i')),
+  );
+  push(rows, 'Account Number', field(text, new RegExp(`Account Number${V}`, 'i')));
+  push(rows, 'Branch', field(text, new RegExp(`^Branch${V}`, 'im')));
+  push(rows, 'Customer Id', field(text, new RegExp(`Customer Id${V}`, 'i')));
+  push(rows, 'Account Currency', field(text, new RegExp(`Account Currency${V}`, 'i')));
+  push(
+    rows,
+    'Opening Balance (Balance B/F)',
+    field(text, /Opening Balance[^\n]*?[ \t]+([\d,]+\.\d{2})/i),
+  );
+  push(
+    rows,
+    'Closing Balance',
+    field(text, /Closing Balance[ \t]+([\d,]+\.\d{2})/i),
+  );
+  push(rows, 'Searched By', field(text, new RegExp(`Searched by${V}`, 'i')));
+  push(rows, 'From Date', field(text, new RegExp(`From Date${V}`, 'i')));
+  push(rows, 'To Date', field(text, new RegExp(`To Date${V}`, 'i')));
+
+  return rows;
+}

@@ -94,12 +94,13 @@ export default function BankSelector({ onSelect }) {
       <Box
         sx={{
           display: 'grid',
-          gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' },
+          gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr', md: '1fr 1fr 1fr' },
           gap: 2.5,
         }}
       >
         <BankCard bank={BANKS.hdfc} onSelect={onSelect} />
         <BankCard bank={BANKS.indian} onSelect={onSelect} />
+        <BankCard bank={BANKS.kvb} onSelect={onSelect} />
       </Box>
     </Box>
   );
