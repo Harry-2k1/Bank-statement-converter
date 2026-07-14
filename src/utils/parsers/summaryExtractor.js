@@ -382,3 +382,162 @@ export function extractAxisSummary(rawText) {
 
   return rows;
 }
+
+/**
+ * Extract Union Bank of India statement header / account details for the Summary sheet.
+ */
+export function extractUnionBankSummary(rawText) {
+  const text = normalize(rawText);
+  const rows = [];
+
+  push(rows, 'Bank', 'Union Bank of India');
+
+  const branchBlock = text.match(/^UNION BANK OF INDIA\n([\s\S]*?)(?=\nTO:\s*DATE:)/im);
+  if (branchBlock) {
+    const branchLines = branchBlock[1]
+      .split('\n')
+      .map((l) => l.replace(/\s+/g, ' ').trim())
+      .filter(Boolean);
+    if (branchLines[0]) push(rows, 'Branch', branchLines[0]);
+    if (branchLines.length > 1) {
+      push(rows, 'Branch Address', branchLines.slice(1).join(', '));
+    }
+  }
+
+  const toBlock = text.match(
+    /TO:\s*DATE:\s*([^\n]+)\n([\s\S]*?)(?=\nTAMIL NADU|\n[A-Z ]+,\s*INDIA)/i,
+  );
+  if (toBlock) {
+    push(rows, 'Statement Date', toBlock[1].trim());
+    const holderLines = toBlock[2]
+      .split('\n')
+      .map((l) => l.replace(/\s+/g, ' ').trim())
+      .filter(Boolean);
+    if (holderLines[0]) push(rows, 'Account Holder', holderLines[0]);
+    if (holderLines.length > 1) {
+      push(rows, 'Address', holderLines.slice(1).join(', '));
+    }
+  }
+
+  push(rows, 'Customer ID', field(text, /CUST\s*ID\s*:\s*(\d+)/i));
+  push(rows, 'Email ID', field(text, /EMAIL ID:\s*([^\n]+)/i));
+  push(rows, 'Village', field(text, /Village\s*:\s*([^\n]+)/i));
+  push(rows, 'CKYC No', field(text, /CKYC\s*No\s*:\s*([A-Z0-9-]+)/i));
+
+  const period = text.match(
+    /STATEMENT\s+OF ACCOUNT\s+FOR THE PERIOD\s+FROM\s+([^\s]+)\s+to\s+([^\s]+)/i,
+  );
+  if (period) {
+    push(rows, 'Statement From', period[1].trim());
+    push(rows, 'Statement To', period[2].trim());
+  }
+
+  const acctField = text.match(/CCSUV-A\/C NO:\s*(\d+)/i) || text.match(/A\/C\s*:\s*(\d+)/i);
+  if (acctField) push(rows, 'Account No', acctField[1]);
+
+  push(
+    rows,
+    'Account Type',
+    field(text, /CCSUV-A\/C NO:\s*\d+\s+([^\n]+)/i),
+  );
+
+  const opening = text.match(/^([\d,]+\.\d{2})\s+([\d,]+\.\d{2})\s*(Dr|Cr)/im);
+  if (opening) {
+    push(rows, 'Opening Balance', `${opening[2]} ${opening[3]}`);
+  }
+
+  const cumulativeMatches = [...text.matchAll(
+    /Cumulative Totals:\s+([\d,]+\.\d{2})\s+([\d,]+\.\d{2})\s+([\d,]+\.\d{2})(Dr|Cr)/gi,
+  )];
+  const cumulative = cumulativeMatches[cumulativeMatches.length - 1];
+  if (cumulative) {
+    push(rows, 'Total Withdrawals', cumulative[1]);
+    push(rows, 'Total Deposits', cumulative[2]);
+    push(rows, 'Closing Balance', `${cumulative[3]} ${cumulative[4]}`);
+  }
+
+  const ifscMicr = text.match(/IFSC\/MICR code for[^\n]*is\s+([A-Z0-9]+)\/(\d+)/i);
+  if (ifscMicr) {
+    push(rows, 'IFSC Code', ifscMicr[1]);
+    push(rows, 'MICR Code', ifscMicr[2]);
+  }
+
+  return rows;
+}
+
+/**
+ * Extract ICICI Bank statement header details for the Summary sheet.
+ */
+export function extractIciciSummary(rawText) {
+  const text = normalize(rawText);
+  const rows = [];
+
+  push(rows, 'Bank', 'ICICI Bank');
+  push(rows, 'Account Name', field(text, /Name:\s*([^\n]+?)(?:\s+A\/C Branch:)/i));
+  push(rows, 'Branch', field(text, /A\/C Branch:\s*([^\n]+)/i));
+  push(rows, 'Account No', field(text, /A\/C No:\s*(\d+)/i));
+  push(rows, 'Account Type', field(text, /A\/C Type:\s*([^\n]+)/i));
+  push(rows, 'Customer ID', field(text, /Cust ID:\s*(\d+)/i));
+  push(rows, 'IFSC Code', field(text, /IFSC Code:\s*([A-Z0-9]+)/i));
+  push(rows, 'Branch Code', field(text, /Branch Code:\s*(\d+)/i));
+  push(rows, 'Statement From', field(text, /Transaction Period:\s*From\s+([^\s]+)/i));
+  push(rows, 'Statement To', field(text, /Transaction Period:[^\n]*?To\s+([^\s]+)/i));
+  push(rows, 'Download Date', field(text, /Statement\s*Request\/Download\s*Date:\s*([^\n]+)/i));
+  push(rows, 'Currency', field(text, /Account Currency:\s*([A-Z]+)/i));
+
+  return rows;
+}
+
+/**
+ * Extract SBI statement header details for the Summary sheet.
+ */
+export function extractSbiSummary(rawText) {
+  const text = normalize(rawText);
+  const rows = [];
+
+  push(rows, 'Bank', 'State Bank of India');
+  push(rows, 'Account Name', field(text, /Account Name\s*:\s*([^\n]+)/i));
+  push(rows, 'Account Number', field(text, /Account Number\s*:\s*(\d+)/i));
+  push(rows, 'Account Description', field(text, /Account Description\s*:\s*([^\n]+)/i));
+  push(rows, 'Branch', field(text, /Branch\s*:\s*([^\n]+)/i));
+  push(rows, 'CIF No', field(text, /CIF No\.?\s*:\s*(\d+)/i));
+  push(rows, 'IFSC Code', field(text, /IFS Code\s*:\s*([A-Z0-9]+)/i));
+  push(rows, 'MICR Code', field(text, /MICR Code\s*:\s*(\d+)/i));
+  push(rows, 'Opening Balance', field(text, /Balance as on[^\n]*:\s*([\d,]+\.\d{2})/i));
+  push(rows, 'Statement Period', field(text, /Account Statement from\s+([^\n]+)/i));
+
+  return rows;
+}
+
+/**
+ * Extract Axis Bank Neo (corporate) statement header details.
+ */
+export function extractAxisNeoSummary(rawText) {
+  const text = normalize(rawText);
+  const rows = [];
+
+  push(rows, 'Bank', 'Axis Bank (Neo / Corporate)');
+  push(rows, 'Format', 'Neo Corporate');
+
+  const holder = text.match(/^([^\n]+)\nJoint Holder/i);
+  if (holder) push(rows, 'Account Holder', holder[1].replace(/\s+/g, ' ').trim());
+
+  push(rows, 'Customer No', field(text, /Customer No\s*:\s*(\d+)/i));
+  push(rows, 'IFSC Code', field(text, /IFSC Code\s*:\s*([A-Z0-9]+)/i));
+  push(rows, 'MICR Code', field(text, /MICR Code\s*:\s*(\d+)/i));
+  push(rows, 'Scheme', field(text, /Scheme\s*:\s*([^\n]+?)(?:\s+currency\s*:)/i));
+  push(rows, 'Currency', field(text, /currency\s*:\s*([A-Z]+)/i));
+
+  const acct = text.match(
+    /Statement of Axis Bank Account No\s*:\s*(\d+)\s+for the period\s*\(\s*From\s*:\s*([^)]+?)\s+To\s*:\s*([^)]+)\)/i,
+  );
+  if (acct) {
+    push(rows, 'Account No', acct[1]);
+    push(rows, 'Statement From', acct[2].trim());
+    push(rows, 'Statement To', acct[3].trim());
+  }
+
+  push(rows, 'Opening Balance', field(text, /Opening Balance:\s*INR\s*([\d,]+\.\d{2})/i));
+
+  return rows;
+}

@@ -64,6 +64,7 @@ const theme = createTheme({
           borderRadius: 12,
           paddingInline: 20,
           paddingBlock: 10,
+          minHeight: 44,
           boxShadow: 'none',
           '&:hover': {
             boxShadow: 'none',

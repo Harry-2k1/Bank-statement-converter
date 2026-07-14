@@ -80,7 +80,11 @@ export default function FileUpload({ bankId, onBack }) {
       <Button
         startIcon={<ArrowBackRoundedIcon />}
         onClick={onBack}
-        sx={{ mb: 2.5, color: 'text.secondary' }}
+        sx={{
+          mb: 2.5,
+          color: 'text.secondary',
+          minHeight: 44,
+        }}
       >
         Back to banks
       </Button>
@@ -246,8 +250,11 @@ export default function FileUpload({ bankId, onBack }) {
 
       {result && (
         <Alert severity="success" sx={{ mb: 2 }}>
-          Converted {result.count} transactions from {result.bankLabel}. Your Excel file has been
-          downloaded.
+          <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+            {result.count} transactions converted
+          </Typography>
+          Your {result.bankLabel} Excel file has been downloaded with transaction and summary
+          sheets.
         </Alert>
       )}
     </Box>
