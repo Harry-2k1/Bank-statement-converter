@@ -1,10 +1,10 @@
 # Statement Converter
 
-Vite + React + MUI app that converts **HDFC Bank**, **Indian Bank**, and **Karur Vysya Bank (KVB)** PDF account statements into Excel (`.xlsx`).
+Vite + React + MUI app that converts **HDFC Bank**, **Indian Bank**, and **Karur Vysya Bank** (Classic + Latest) PDF account statements into Excel (`.xlsx`).
 
 ## Features
 
-- Choose HDFC Bank, Indian Bank, or Karur Vysya Bank
+- Choose HDFC Bank, Indian Bank, KVB (Classic), or KVB (Latest)
 - Modern drag-and-drop PDF upload
 - Client-side PDF parsing and Excel download
 - Sample statements in `sample statments/`

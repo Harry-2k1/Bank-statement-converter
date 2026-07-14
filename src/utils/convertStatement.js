@@ -6,9 +6,14 @@ import {
 } from './parsers/indianBankParser';
 import { parseKvbStatement, KVB_COLUMNS } from './parsers/kvbParser';
 import {
+  parseKvbLatestStatement,
+  KVB_LATEST_COLUMNS,
+} from './parsers/kvbLatestParser';
+import {
   extractHdfcSummary,
   extractIndianBankSummary,
   extractKvbSummary,
+  extractKvbLatestSummary,
 } from './parsers/summaryExtractor';
 import { exportTransactionsToExcel } from './excelExporter';
 
@@ -29,10 +34,17 @@ export const BANKS = {
   },
   kvb: {
     id: 'kvb',
-    label: 'Karur Vysya Bank',
-    short: 'KVB',
-    description: 'Convert Karur Vysya Bank account statement PDFs into Excel.',
+    label: 'KVB (Classic)',
+    short: 'KVB Classic',
+    description: 'Older KVB online statement format (Transaction Date with time).',
     accent: '#C45C26',
+  },
+  kvbLatest: {
+    id: 'kvbLatest',
+    label: 'KVB (Latest)',
+    short: 'KVB Latest',
+    description: 'Latest KVB statement format (Txn Date / Value Date / Ref. No).',
+    accent: '#A3451F',
   },
 };
 
@@ -66,6 +78,11 @@ export async function convertStatementPdf(file, bankId) {
     columns = KVB_COLUMNS;
     bankLabel = BANKS.kvb.label;
     summaryDetails = extractKvbSummary(text);
+  } else if (bankId === 'kvbLatest') {
+    rows = parseKvbLatestStatement(text);
+    columns = KVB_LATEST_COLUMNS;
+    bankLabel = BANKS.kvbLatest.label;
+    summaryDetails = extractKvbLatestSummary(text);
   } else {
     throw new Error('Unsupported bank selected.');
   }

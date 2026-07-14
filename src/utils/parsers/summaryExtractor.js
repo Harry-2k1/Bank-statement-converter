@@ -219,3 +219,83 @@ export function extractKvbSummary(rawText) {
 
   return rows;
 }
+
+/**
+ * Extract Karur Vysya Bank latest-format statement header details.
+ */
+export function extractKvbLatestSummary(rawText) {
+  const text = normalize(rawText);
+  const rows = [];
+
+  push(rows, 'Bank', 'Karur Vysya Bank');
+  push(rows, 'Format', 'Latest');
+
+  const title = text.match(/Messrs[ \t]+(.+?)[ \t]+Acc\.No\.[ \t]*:[ \t]*(\d+)/i);
+  if (title) {
+    push(rows, 'Account Holder', title[1].trim());
+    push(rows, 'Account Number', title[2].trim());
+  } else {
+    push(rows, 'Account Number', field(text, /Acc\.No\.[ \t]*:[ \t]*(\d+)/i));
+  }
+
+  const addressBlock = text.match(
+    /Acc\.No\.[^\n]*\n([\s\S]*?)(?=\n\d{6,}\nCA-|\nCustomer ID|\nAccount Summary)/i,
+  );
+  if (addressBlock) {
+    const lines = addressBlock[1]
+      .split('\n')
+      .map((l) => l.replace(/[ \t]+/g, ' ').trim())
+      .filter((l) => l && !/^:+$/.test(l));
+    // Drop trailing meta values that sit above the label list
+    const cleaned = [];
+    for (const line of lines) {
+      if (/^\d{6,}$/.test(line)) break;
+      if (/^CA-/i.test(line)) break;
+      if (/^\d{2}\/\d{2}\/\d{4}/.test(line)) break;
+      if (/@/.test(line)) break;
+      cleaned.push(line);
+    }
+    if (cleaned.length) push(rows, 'Address', cleaned.join(', '));
+  }
+
+  // Values appear above labels in this format
+  const meta = text.match(
+    /\n(\d{6,})\n([A-Z0-9-]+)\n(\d{2}\/\d{2}\/\d{4})\n([^\n]*?to[^\n]*)\n(\d{10,})\n([^\n]+@?[^\n]*)\n:+/i,
+  );
+  if (meta) {
+    push(rows, 'Customer ID', meta[1]);
+    push(rows, 'Acc. Type', meta[2]);
+    push(rows, 'Statement Date', meta[3]);
+    push(rows, 'Statement Period', meta[4].trim());
+    push(rows, 'Mobile No', meta[5]);
+    push(rows, 'Email Id', meta[6].trim());
+  }
+
+  const summaryLine = text.match(
+    /Transactions\n([\d,]+\.\d{2})\s+([\d,]+\.\d{2})\s+([\d,]+\.\d{2})\s+([\d,]+\.\d{2})\s+(CR:\d+\/DR:\d+)/i,
+  );
+  if (summaryLine) {
+    push(rows, 'Opening Balance', summaryLine[1]);
+    push(rows, 'Total Credit Amount', summaryLine[2]);
+    push(rows, 'Total Debit Amount', summaryLine[3]);
+    push(rows, 'Closing Balance', summaryLine[4]);
+    push(rows, 'Count of Cr. & Dr.', summaryLine[5]);
+  }
+
+  push(
+    rows,
+    'Home Branch',
+    field(text, /HOME BRANCH[ \t]*:[ \t]*([^\n]+)/i),
+  );
+  const branchAddress = field(
+    text,
+    /ADDRESS[ \t]*:[ \t]*([\s\S]*?)(?=\n\*+|Statements are sent|$)/i,
+  );
+  if (branchAddress) {
+    push(rows, 'Branch Address', branchAddress.replace(/\s+/g, ' ').trim());
+  }
+  push(rows, 'IFSC Code', field(text, /IFSC CODE\s*-\s*([A-Z0-9]+)/i));
+  push(rows, 'MICR Code', field(text, /MICR CODE\s*-\s*([0-9]+)/i));
+
+  return rows;
+}
