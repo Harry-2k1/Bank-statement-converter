@@ -68,51 +68,28 @@ export default function FileUpload({ bankId, onBack }) {
   };
 
   return (
-    <Box
-      sx={{
-        '@keyframes fadeUp': {
-          from: { opacity: 0, transform: 'translateY(12px)' },
-          to: { opacity: 1, transform: 'translateY(0)' },
-        },
-        animation: 'fadeUp 420ms ease both',
-      }}
-    >
-      <Button
-        startIcon={<ArrowBackRoundedIcon />}
-        onClick={onBack}
-        sx={{
-          mb: 2.5,
-          color: 'text.secondary',
-          minHeight: 44,
-        }}
-      >
-        Back to banks
-      </Button>
-
-      <Stack
-        direction={{ xs: 'column', sm: 'row' }}
-        spacing={1.5}
-        sx={{
-          mb: 3,
-          justifyContent: 'space-between',
-          alignItems: { xs: 'flex-start', sm: 'center' },
-        }}
-      >
-        <Box>
-          <Typography variant="h4" sx={{ fontSize: { xs: '1.7rem', md: '2.1rem' } }}>
-            Upload {bank.label} statement
-          </Typography>
-          <Typography color="text.secondary" sx={{ mt: 0.75 }}>
-            Drop your PDF here or browse a file. Excel downloads automatically after conversion.
-          </Typography>
-        </Box>
+    <Box>
+      <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 1.5 }}>
+        <Button
+          size="small"
+          startIcon={<ArrowBackRoundedIcon sx={{ fontSize: 16 }} />}
+          onClick={onBack}
+          sx={{ color: 'text.secondary', minHeight: 32, py: 0.5, px: 1 }}
+        >
+          Back
+        </Button>
+        <Typography variant="subtitle2" sx={{ fontWeight: 700, flex: 1, fontSize: '0.85rem' }}>
+          {bank.label}
+        </Typography>
         <Chip
           label={bank.short}
+          size="small"
           sx={{
             bgcolor: bank.accent,
             color: '#fff',
             fontWeight: 600,
-            height: 32,
+            height: 22,
+            fontSize: '0.7rem',
           }}
         />
       </Stack>
@@ -131,19 +108,18 @@ export default function FileUpload({ bankId, onBack }) {
           if (e.key === 'Enter' || e.key === ' ') inputRef.current?.click();
         }}
         sx={{
-          borderRadius: 3,
-          border: '1.5px dashed',
-          borderColor: dragOver ? 'secondary.main' : 'rgba(11, 61, 74, 0.28)',
+          borderRadius: 1.5,
+          border: '1px dashed',
+          borderColor: dragOver ? 'secondary.main' : 'rgba(11, 61, 74, 0.22)',
           background: dragOver
-            ? 'linear-gradient(180deg, rgba(61,184,160,0.14), rgba(255,255,255,0.9))'
-            : 'linear-gradient(180deg, rgba(255,255,255,0.95), rgba(234,243,241,0.75))',
-          px: { xs: 2.5, md: 4 },
-          py: { xs: 4, md: 5.5 },
+            ? 'rgba(61,184,160,0.1)'
+            : 'rgba(255,255,255,0.7)',
+          px: 2,
+          py: 2.5,
           textAlign: 'center',
           cursor: 'pointer',
-          transition: 'border-color 180ms ease, background 180ms ease, transform 180ms ease',
-          transform: dragOver ? 'scale(1.01)' : 'none',
-          mb: 2.5,
+          transition: 'border-color 150ms ease, background 150ms ease',
+          mb: 1.5,
         }}
       >
         <input
@@ -153,42 +129,25 @@ export default function FileUpload({ bankId, onBack }) {
           hidden
           onChange={(e) => acceptFile(e.target.files?.[0])}
         />
-        <Box
-          sx={{
-            width: 72,
-            height: 72,
-            mx: 'auto',
-            mb: 2,
-            borderRadius: '50%',
-            display: 'grid',
-            placeItems: 'center',
-            color: 'primary.main',
-            background: 'rgba(61, 184, 160, 0.16)',
-            '@keyframes floatIcon': {
-              '0%, 100%': { transform: 'translateY(0)' },
-              '50%': { transform: 'translateY(-5px)' },
-            },
-            animation: 'floatIcon 2.8s ease-in-out infinite',
-          }}
-        >
-          <CloudUploadRoundedIcon sx={{ fontSize: 36 }} />
-        </Box>
-        <Typography variant="h6" sx={{ mb: 0.75 }}>
-          Drag & drop PDF statement
+        <CloudUploadRoundedIcon
+          sx={{ fontSize: 28, color: 'secondary.main', mb: 0.5 }}
+        />
+        <Typography variant="body2" fontWeight={600} sx={{ mb: 0.25 }}>
+          Drop PDF or click to browse
         </Typography>
-        <Typography color="text.secondary" variant="body2">
-          or click to browse from your device
+        <Typography variant="caption" color="text.secondary">
+          Excel downloads automatically after conversion
         </Typography>
       </Box>
 
       {file && (
         <Stack
           direction={{ xs: 'column', sm: 'row' }}
-          spacing={2}
+          spacing={1}
           sx={{
-            p: 2,
-            mb: 2.5,
-            borderRadius: 2.5,
+            p: 1.25,
+            mb: 1.5,
+            borderRadius: 1.25,
             border: '1px solid',
             borderColor: 'divider',
             bgcolor: 'rgba(255,255,255,0.8)',
@@ -196,10 +155,10 @@ export default function FileUpload({ bankId, onBack }) {
             alignItems: { xs: 'stretch', sm: 'center' },
           }}
         >
-          <Stack direction="row" spacing={1.5} sx={{ minWidth: 0, alignItems: 'center' }}>
-            <PictureAsPdfRoundedIcon color="error" />
+          <Stack direction="row" spacing={1} sx={{ minWidth: 0, alignItems: 'center' }}>
+            <PictureAsPdfRoundedIcon color="error" sx={{ fontSize: 20 }} />
             <Box sx={{ minWidth: 0 }}>
-              <Typography noWrap fontWeight={600}>
+              <Typography noWrap fontWeight={600} variant="body2">
                 {file.name}
               </Typography>
               <Typography variant="caption" color="text.secondary">
@@ -207,8 +166,9 @@ export default function FileUpload({ bankId, onBack }) {
               </Typography>
             </Box>
           </Stack>
-          <Stack direction="row" spacing={1}>
+          <Stack direction="row" spacing={0.75}>
             <Button
+              size="small"
               variant="outlined"
               color="inherit"
               onClick={(e) => {
@@ -222,39 +182,38 @@ export default function FileUpload({ bankId, onBack }) {
               Remove
             </Button>
             <Button
+              size="small"
               variant="contained"
-              startIcon={<DownloadRoundedIcon />}
+              startIcon={<DownloadRoundedIcon sx={{ fontSize: 16 }} />}
               onClick={handleConvert}
               disabled={loading}
             >
-              {loading ? 'Converting…' : 'Convert to Excel'}
+              {loading ? 'Converting…' : 'Convert'}
             </Button>
           </Stack>
         </Stack>
       )}
 
       {loading && (
-        <Box sx={{ mb: 2 }}>
-          <LinearProgress color="secondary" />
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-            Reading PDF pages and building Excel…
+        <Box sx={{ mb: 1.5 }}>
+          <LinearProgress color="secondary" sx={{ height: 4, borderRadius: 1 }} />
+          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+            Reading PDF and building Excel…
           </Typography>
         </Box>
       )}
 
       {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
+        <Alert severity="error" sx={{ mb: 1.5, py: 0.5, fontSize: '0.8rem' }}>
           {error}
         </Alert>
       )}
 
       {result && (
-        <Alert severity="success" sx={{ mb: 2 }}>
-          <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
-            {result.count} transactions converted
+        <Alert severity="success" sx={{ py: 0.5, fontSize: '0.8rem' }}>
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            {result.count} transactions converted — Excel downloaded.
           </Typography>
-          Your {result.bankLabel} Excel file has been downloaded with transaction and summary
-          sheets.
         </Alert>
       )}
     </Box>
