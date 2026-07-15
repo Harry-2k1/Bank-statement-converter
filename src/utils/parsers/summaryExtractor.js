@@ -541,3 +541,90 @@ export function extractAxisNeoSummary(rawText) {
 
   return rows;
 }
+
+/**
+ * Extract Canara Bank statement header details for the Summary sheet.
+ */
+export function extractCanaraSummary(rawText) {
+  const text = normalize(rawText);
+  const rows = [];
+
+  push(rows, 'Bank', 'Canara Bank');
+  push(
+    rows,
+    'Account Holder',
+    field(text, /Account Holders Name\s+([^\n]+)/i),
+  );
+  push(rows, 'Customer Id', field(text, /Customer Id\s+(\d+)/i));
+  push(rows, 'Branch Name', field(text, /Branch Name\s+([^\n]+)/i));
+  push(rows, 'MICR Code', field(text, /MICR Code\s+(\d+)/i));
+  push(rows, 'IFSC Code', field(text, /IFSC Code\s+([A-Z0-9]+)/i));
+  push(rows, 'Account Number', field(text, /Account Number\s+(\d+)/i));
+  push(rows, 'Account Currency', field(text, /Account Currency\s+([A-Z]+)/i));
+  push(rows, 'Product Name', field(text, /Product Name\s+([^\n]+)/i));
+  push(
+    rows,
+    'Statement Period',
+    field(text, /Searched By\s+From\s+([^\n]+)/i),
+  );
+  push(
+    rows,
+    'Statement As Of',
+    field(text, /Account Statement as of\s+([^\n]+)/i),
+  );
+  push(
+    rows,
+    'Opening Balance',
+    field(text, /Opening Balance\s+Rs\.\s*([^\n]+)/i),
+  );
+  push(
+    rows,
+    'Closing Balance',
+    field(text, /Closing Balance\s+Rs\.\s*([^\n]+)/i),
+  );
+
+  return rows;
+}
+
+/**
+ * Extract City Union Bank (CUB) statement header details for the Summary sheet.
+ */
+export function extractCubSummary(rawText) {
+  const text = normalize(rawText);
+  const rows = [];
+
+  push(rows, 'Bank', 'City Union Bank (CUB)');
+  push(rows, 'Branch', field(text, /Branch:(\d+:[^\n]+)/i));
+  push(rows, 'Ref No', field(text, /Ref No\s*:\s*(\S+)/i));
+  push(rows, 'Account No', field(text, /Account No\s+(\d+)/i));
+  push(
+    rows,
+    'Statement Period',
+    field(text, /Account No\s+\d+\s+(\d{2}-[A-Z]{3}-\d{4}[^\n]*)/i),
+  );
+  push(
+    rows,
+    'Account Type',
+    field(text, /(Current Account[^0-9\n]+)/i),
+  );
+  push(
+    rows,
+    'Date of Opening',
+    field(text, /Current Account[^\n]*?\s+(\d{2}-[A-Z]{3}-\d{4})/i),
+  );
+  push(rows, 'Customer No', field(text, /(\d+)\s+Customer No/i));
+  push(
+    rows,
+    'Account Holder',
+    field(text, /\n([A-Z][A-Z0-9 /&.-]{4,})\nAccount Type/i),
+  );
+  const ckyc = field(text, /CKYC No\s*:\s*(\d+)/i);
+  if (ckyc) push(rows, 'CKYC No', ckyc);
+  push(
+    rows,
+    'Opening Balance',
+    field(text, /([\d,]+\.\d{2})\s*\nOpening Balance as on\s+\d{2}-[A-Z]{3}-\d{4}/i),
+  );
+
+  return rows;
+}

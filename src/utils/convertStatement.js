@@ -17,6 +17,8 @@ import {
 } from './parsers/unionBankParser';
 import { parseIciciStatement, ICICI_COLUMNS } from './parsers/iciciParser';
 import { parseSbiStatement, SBI_COLUMNS } from './parsers/sbiParser';
+import { parseCanaraStatement, CANARA_COLUMNS } from './parsers/canaraParser';
+import { parseCubStatement, CUB_COLUMNS } from './parsers/cubParser';
 import {
   extractHdfcSummary,
   extractIndianBankSummary,
@@ -27,6 +29,8 @@ import {
   extractUnionBankSummary,
   extractIciciSummary,
   extractSbiSummary,
+  extractCanaraSummary,
+  extractCubSummary,
 } from './parsers/summaryExtractor';
 import { exportTransactionsToExcel } from './excelExporter';
 
@@ -62,6 +66,14 @@ export const BANKS = {
     description: 'Union Bank of India account statement PDFs into Excel.',
     accent: '#0051A5',
   },
+  canara: {
+    id: 'canara',
+    label: 'Canara Bank',
+    short: 'Canara',
+    group: 'public',
+    description: 'Canara Bank current/savings and OD account statements.',
+    accent: '#0084C7',
+  },
   hdfc: {
     id: 'hdfc',
     label: 'HDFC Bank',
@@ -77,6 +89,14 @@ export const BANKS = {
     group: 'private',
     description: 'ICICI detailed statement export with tran IDs and remarks.',
     accent: '#F58220',
+  },
+  cub: {
+    id: 'cub',
+    label: 'City Union Bank (CUB)',
+    short: 'CUB',
+    group: 'private',
+    description: 'City Union Bank account statements (balance-first format).',
+    accent: '#1B365D',
   },
   axis: {
     id: 'axis',
@@ -157,6 +177,16 @@ const BANK_HANDLERS = {
     parse: parseSbiStatement,
     columns: SBI_COLUMNS,
     summary: extractSbiSummary,
+  },
+  canara: {
+    parse: parseCanaraStatement,
+    columns: CANARA_COLUMNS,
+    summary: extractCanaraSummary,
+  },
+  cub: {
+    parse: parseCubStatement,
+    columns: CUB_COLUMNS,
+    summary: extractCubSummary,
   },
 };
 
