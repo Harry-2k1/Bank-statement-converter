@@ -44,9 +44,7 @@ import { exportTransactionsToExcel } from './excelExporter';
 
 export const BANK_GROUPS = [
   { id: 'public', label: 'Public sector banks' },
-  { id: 'private', label: 'Private & other banks' },
-  { id: 'axis', label: 'Axis Bank formats' },
-  { id: 'kvb', label: 'Karur Vysya Bank' },
+  { id: 'private', label: 'Private sector banks' },
 ];
 
 export const BANKS = {
@@ -142,7 +140,7 @@ export const BANKS = {
     id: 'axis',
     label: 'Axis Bank (Retail)',
     short: 'Axis Retail',
-    group: 'axis',
+    group: 'private',
     description: 'Standard Axis retail/corporate statement (Tran Date format).',
     accent: '#97144D',
   },
@@ -150,7 +148,7 @@ export const BANKS = {
     id: 'axisNeo',
     label: 'Axis Bank (Neo)',
     short: 'Axis Neo',
-    group: 'axis',
+    group: 'private',
     description: 'Axis Neo corporate statements (DD/MM/YYYY, DR/CR columns).',
     accent: '#7B1040',
   },
@@ -158,7 +156,7 @@ export const BANKS = {
     id: 'kvb',
     label: 'Karur Vysya Bank (Classic)',
     short: 'KVB Classic',
-    group: 'kvb',
+    group: 'private',
     description: 'Older KVB online statement format (Transaction Date with time).',
     accent: '#C45C26',
   },
@@ -166,7 +164,7 @@ export const BANKS = {
     id: 'kvbLatest',
     label: 'Karur Vysya Bank (Latest)',
     short: 'KVB Latest',
-    group: 'kvb',
+    group: 'private',
     description: 'Latest KVB statement format (Txn Date / Value Date / Ref. No).',
     accent: '#A3451F',
   },
