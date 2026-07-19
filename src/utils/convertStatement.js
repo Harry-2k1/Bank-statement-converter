@@ -22,6 +22,7 @@ import { parseCubStatement, CUB_COLUMNS } from './parsers/cubParser';
 import { parseSibStatement, SIB_COLUMNS } from './parsers/sibParser';
 import { parseFederalStatement, FEDERAL_COLUMNS } from './parsers/federalParser';
 import { parseDbsStatement, DBS_COLUMNS } from './parsers/dbsParser';
+import { parseTmbStatement, TMB_COLUMNS } from './parsers/tmbParser';
 import {
   extractHdfcSummary,
   extractIndianBankSummary,
@@ -37,6 +38,7 @@ import {
   extractSibSummary,
   extractFederalSummary,
   extractDbsSummary,
+  extractTmbSummary,
 } from './parsers/summaryExtractor';
 import { exportTransactionsToExcel } from './excelExporter';
 
@@ -127,6 +129,14 @@ export const BANKS = {
     group: 'private',
     description: 'DBS Bank India digibank account statements.',
     accent: '#C02026',
+  },
+  tmb: {
+    id: 'tmb',
+    label: 'Tamilnad Mercantile Bank (TMB)',
+    short: 'TMB',
+    group: 'private',
+    description: 'TMB internet banking transaction list exports (OD/current).',
+    accent: '#006B3F',
   },
   axis: {
     id: 'axis',
@@ -232,6 +242,11 @@ const BANK_HANDLERS = {
     parse: parseDbsStatement,
     columns: DBS_COLUMNS,
     summary: extractDbsSummary,
+  },
+  tmb: {
+    parse: parseTmbStatement,
+    columns: TMB_COLUMNS,
+    summary: extractTmbSummary,
   },
 };
 

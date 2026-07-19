@@ -731,3 +731,45 @@ export function extractDbsSummary(rawText) {
 
   return rows;
 }
+
+/**
+ * Extract Tamilnad Mercantile Bank (TMB) statement header details.
+ */
+export function extractTmbSummary(rawText) {
+  const text = normalize(rawText);
+  const rows = [];
+
+  push(rows, 'Bank', 'Tamilnad Mercantile Bank (TMB)');
+  push(
+    rows,
+    'Account Holder',
+    field(text, /Transactions List\s*-\s*[^-]+-\s*([^(]+)\(/i),
+  );
+  push(rows, 'Account Number', field(text, /Account Number\s*:\s*(\d+)/i));
+  push(rows, 'Customer Id', field(text, /Cust Id\s*:\s*(\d+)/i));
+  push(rows, 'Branch Id', field(text, /Branch Id\s*:\s*(\d+)/i));
+  push(rows, 'Branch Name', field(text, /Branch Name\s*:\s*([^\n]+)/i));
+  push(rows, 'IFSC Code', field(text, /(TMBL\d+)\s+IFSC/i));
+  push(
+    rows,
+    'Statement From',
+    field(text, /Transaction Date From:\(dd\/MM\/yyyy\):\s*(\d{2}\/\d{2}\/\d{4})/i),
+  );
+  push(
+    rows,
+    'Statement To',
+    field(text, /Transaction Date To:\(dd\/MM\/yyyy\):\s*(\d{2}\/\d{2}\/\d{4})/i),
+  );
+  push(
+    rows,
+    'Account Type',
+    field(text, /Transactions List\s*-\s*([^-]+)-/i),
+  );
+  push(
+    rows,
+    'Email',
+    field(text, /([\w.-]+@tmbank\.in)/i) || field(text, /Email\s*:\s*([^\n]+)/i),
+  );
+
+  return rows;
+}
