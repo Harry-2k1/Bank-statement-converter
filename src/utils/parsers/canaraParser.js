@@ -90,6 +90,10 @@ function classifyMovement(particulars, movement, balance, prevBalance) {
  * Parse Canara Bank account statement text into transaction rows.
  */
 export function parseCanaraStatement(text) {
+  if (/Statement for A\/c/i.test(text) || /Date\s+Particulars\s+Deposits/i.test(text)) {
+    return parseCanaraPassbookStatement(text);
+  }
+
   const lines = text.split(/\r?\n/).map((l) => l.replace(/\s+/g, ' ').trim());
   const rows = [];
   let pending = null;
@@ -160,6 +164,113 @@ export function parseCanaraStatement(text) {
     pending.lines.push(raw);
     if (extractFooter(pending.lines.join(' ').replace(/\s+/g, ' ').trim())) {
       flush();
+    }
+  }
+
+  flush();
+  return rows;
+}
+
+const PASSBOOK_DATE_RE = /^(\d{2}-\d{2}-\d{4})$/;
+const PASSBOOK_FOOTER_RE = /^([\d,]+\.\d{2})\s+([\d,]+\.\d{2})$/;
+const PASSBOOK_CHQ_RE = /^Chq:\s*(\S*)\s*$/i;
+
+const PASSBOOK_SKIP = [
+  /^Statement for A\/c/i,
+  /^Customer Id/i,
+  /^Name\s+/i,
+  /^Phone\s+/i,
+  /^Address\s+/i,
+  /^Branch Code/i,
+  /^Branch Name/i,
+  /^IFSC Code/i,
+  /^Date\s+Particulars/i,
+  /^Opening Balance\s+[\d,]/i,
+  /^page \d+$/i,
+  /^#\d+/i,
+  /^s\/o /i,
+  /^tamil nadu$/i,
+  /^suramangalam/i,
+  /^junction main/i,
+  /^between \d/i,
+];
+
+function shouldSkipPassbook(line) {
+  const trimmed = line.trim();
+  if (!trimmed) return true;
+  return PASSBOOK_SKIP.some((re) => re.test(trimmed));
+}
+
+/**
+ * Parse Canara Bank passbook / internet banking statement (Date + Particulars format).
+ */
+export function parseCanaraPassbookStatement(text) {
+  const lines = text.split(/\r?\n/).map((l) => l.replace(/\s+/g, ' ').trim());
+  const rows = [];
+  let pending = null;
+  let prevBalance = null;
+
+  const openingMatch = text.match(/^Opening Balance\s+([\d,]+\.\d{2})/im);
+  if (openingMatch) {
+    prevBalance = parseAmount(openingMatch[1]);
+  }
+
+  const flush = () => {
+    if (!pending?.footer) {
+      pending = null;
+      return;
+    }
+
+    const particulars = pending.lines.join(' ').replace(/\s+/g, ' ').trim();
+    const movement = pending.footer.movement;
+    const balance = pending.footer.balance;
+
+    const { debit, credit } = classifyMovement(particulars, movement, balance, prevBalance);
+
+    rows.push({
+      txnDate: pending.date,
+      txnTime: '',
+      valueDate: '',
+      description: particulars,
+      chqNo: pending.chqNo || '',
+      branchCode: '',
+      debit,
+      credit,
+      balance,
+    });
+
+    prevBalance = balance;
+    pending = null;
+  };
+
+  for (const raw of lines) {
+    if (shouldSkipPassbook(raw)) continue;
+
+    const dateMatch = raw.match(PASSBOOK_DATE_RE);
+    if (dateMatch) {
+      flush();
+      pending = { date: dateMatch[1], lines: [], chqNo: '', footer: null };
+      continue;
+    }
+
+    const footerMatch = raw.match(PASSBOOK_FOOTER_RE);
+    if (footerMatch && pending) {
+      pending.footer = {
+        movement: parseAmount(footerMatch[1]),
+        balance: parseAmount(footerMatch[2]),
+      };
+      flush();
+      continue;
+    }
+
+    const chqMatch = raw.match(PASSBOOK_CHQ_RE);
+    if (chqMatch && pending) {
+      pending.chqNo = chqMatch[1] === '0' ? '' : chqMatch[1];
+      continue;
+    }
+
+    if (pending) {
+      pending.lines.push(raw);
     }
   }
 

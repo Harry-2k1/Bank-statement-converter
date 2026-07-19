@@ -583,6 +583,31 @@ export function extractCanaraSummary(rawText) {
     field(text, /Closing Balance\s+Rs\.\s*([^\n]+)/i),
   );
 
+  if (!rows.some(([l, v]) => l === 'Account Number' && v)) {
+    push(
+      rows,
+      'Account Number',
+      field(text, /Statement for A\/c\s+(\d+)/i),
+    );
+  }
+  if (!rows.some(([l, v]) => l === 'Statement Period' && v)) {
+    push(
+      rows,
+      'Statement Period',
+      field(text, /between\s+([^\n]+)/i),
+    );
+  }
+  if (!rows.some(([l, v]) => l === 'Account Holder' && v)) {
+    push(rows, 'Account Holder', field(text, /Name\s+([^\n]+)/i));
+  }
+  if (!rows.some(([l, v]) => l === 'Opening Balance' && v)) {
+    push(
+      rows,
+      'Opening Balance',
+      field(text, /^Opening Balance\s+([\d,]+\.\d{2})/im),
+    );
+  }
+
   return rows;
 }
 
@@ -625,6 +650,84 @@ export function extractCubSummary(rawText) {
     'Opening Balance',
     field(text, /([\d,]+\.\d{2})\s*\nOpening Balance as on\s+\d{2}-[A-Z]{3}-\d{4}/i),
   );
+
+  return rows;
+}
+
+/**
+ * Extract South Indian Bank (SIB) statement header details.
+ */
+export function extractSibSummary(rawText) {
+  const text = normalize(rawText);
+  const rows = [];
+
+  push(rows, 'Bank', 'South Indian Bank (SIB)');
+  push(rows, 'IFSC Code', field(text, /(SIBL\d+)\s+IFSC:/i));
+  push(rows, 'Account No', field(text, /A\/C NO\s*:\s*(\d+)/i));
+  push(rows, 'Customer Id', field(text, /CUSTOMER ID\s*:\s*(\S+)/i));
+  push(
+    rows,
+    'Statement Period',
+    field(text, /STATEMENT OF ACCOUNT FOR THE PERIOD FROM\s+([^\n]+)/i),
+  );
+  push(rows, 'Account Type', field(text, /TYPE\s*:\s*([^\n]+)/i));
+  push(rows, 'Mode of Operation', field(text, /MODE OF OPR\s*:\s*([^\n]+)/i));
+  push(rows, 'Currency', field(text, /CURRENCY CODE:\s*(\w+)/i));
+
+  const holder = text.match(/PARTICULARS DATE[\s\S]*?\n([A-Z][^\n]+)\n/i);
+  if (holder) push(rows, 'Account Holder', holder[1].replace(/\s+/g, ' ').trim());
+
+  return rows;
+}
+
+/**
+ * Extract Federal Bank statement header details.
+ */
+export function extractFederalSummary(rawText) {
+  const text = normalize(rawText);
+  const rows = [];
+
+  push(rows, 'Bank', 'Federal Bank');
+  push(rows, 'Account Holder', field(text, /^Name\s+([^\n]+)/im));
+  push(rows, 'Account Number', field(text, /Account Number\s*:\s*(\d+)/i));
+  push(rows, 'Customer Id', field(text, /Customer Id\s*:\s*(\d+)/i));
+  push(rows, 'Account Type', field(text, /Type of Account\s*:\s*([^\n]+)/i));
+  push(rows, 'Scheme', field(text, /Scheme\s*:\s*([^\n]+)/i));
+  push(rows, 'IFSC', field(text, /IFSC\s*:\s*([A-Z0-9]+)/i));
+  push(rows, 'MICR Code', field(text, /MICR Code\s*:\s*(\d+)/i));
+  push(rows, 'Branch Name', field(text, /Branch Name\s*:\s*([^\n]+)/i));
+  push(rows, 'Opening Balance', field(text, /Opening Balance\s*:\s*([\d,]+\.\d{2})/i));
+  push(
+    rows,
+    'Statement Period',
+    field(text, /Statement of Account for the period\s+([^\n]+)/i),
+  );
+
+  return rows;
+}
+
+/**
+ * Extract DBS Bank India statement header details.
+ */
+export function extractDbsSummary(rawText) {
+  const text = normalize(rawText);
+  const rows = [];
+
+  push(rows, 'Bank', 'DBS Bank India');
+  push(rows, 'Account Name', field(text, /Account Name:\s*([^\n]+)/i));
+  push(rows, 'Account No', field(text, /Account No\.?\s*:\s*(\d+)/i));
+  push(rows, 'Customer No', field(text, /Customer No\.?\s*:\s*(\d+)/i));
+  push(rows, 'Account Type', field(text, /Account Type:\s*([^\n]+)/i));
+  push(rows, 'IFSC Code', field(text, /IFSC Code:\s*([A-Z0-9]+)/i));
+  push(rows, 'MICR Code', field(text, /MICR Code:\s*(\d+)/i));
+  push(
+    rows,
+    'Statement Period',
+    field(text, /Statement Period:\s*([^\n]+)/i) ||
+      field(text, /Statement Period\s+([\d-][^\n]+)/i),
+  );
+  push(rows, 'Currency', field(text, /Currency:\s*(\w+)/i));
+  push(rows, 'Opening Balance', field(text, /Opening Balance\s+([\d,]+\.\d{2})/i));
 
   return rows;
 }

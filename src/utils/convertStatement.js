@@ -19,6 +19,9 @@ import { parseIciciStatement, ICICI_COLUMNS } from './parsers/iciciParser';
 import { parseSbiStatement, SBI_COLUMNS } from './parsers/sbiParser';
 import { parseCanaraStatement, CANARA_COLUMNS } from './parsers/canaraParser';
 import { parseCubStatement, CUB_COLUMNS } from './parsers/cubParser';
+import { parseSibStatement, SIB_COLUMNS } from './parsers/sibParser';
+import { parseFederalStatement, FEDERAL_COLUMNS } from './parsers/federalParser';
+import { parseDbsStatement, DBS_COLUMNS } from './parsers/dbsParser';
 import {
   extractHdfcSummary,
   extractIndianBankSummary,
@@ -31,6 +34,9 @@ import {
   extractSbiSummary,
   extractCanaraSummary,
   extractCubSummary,
+  extractSibSummary,
+  extractFederalSummary,
+  extractDbsSummary,
 } from './parsers/summaryExtractor';
 import { exportTransactionsToExcel } from './excelExporter';
 
@@ -97,6 +103,30 @@ export const BANKS = {
     group: 'private',
     description: 'City Union Bank account statements (balance-first format).',
     accent: '#1B365D',
+  },
+  sib: {
+    id: 'sib',
+    label: 'South Indian Bank (SIB)',
+    short: 'SIB',
+    group: 'private',
+    description: 'South Indian Bank statements (particulars + date format).',
+    accent: '#0054A6',
+  },
+  federal: {
+    id: 'federal',
+    label: 'Federal Bank',
+    short: 'Federal',
+    group: 'private',
+    description: 'Federal Bank savings/current account PDF statements.',
+    accent: '#004F9F',
+  },
+  dbs: {
+    id: 'dbs',
+    label: 'DBS Bank India',
+    short: 'DBS',
+    group: 'private',
+    description: 'DBS Bank India digibank account statements.',
+    accent: '#C02026',
   },
   axis: {
     id: 'axis',
@@ -187,6 +217,21 @@ const BANK_HANDLERS = {
     parse: parseCubStatement,
     columns: CUB_COLUMNS,
     summary: extractCubSummary,
+  },
+  sib: {
+    parse: parseSibStatement,
+    columns: SIB_COLUMNS,
+    summary: extractSibSummary,
+  },
+  federal: {
+    parse: parseFederalStatement,
+    columns: FEDERAL_COLUMNS,
+    summary: extractFederalSummary,
+  },
+  dbs: {
+    parse: parseDbsStatement,
+    columns: DBS_COLUMNS,
+    summary: extractDbsSummary,
   },
 };
 
