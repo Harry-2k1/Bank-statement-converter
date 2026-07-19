@@ -146,7 +146,7 @@ export const BANKS = {
   },
   kvb: {
     id: 'kvb',
-    label: 'KVB (Classic)',
+    label: 'Karur Vysya Bank (Classic)',
     short: 'KVB Classic',
     group: 'kvb',
     description: 'Older KVB online statement format (Transaction Date with time).',
@@ -154,7 +154,7 @@ export const BANKS = {
   },
   kvbLatest: {
     id: 'kvbLatest',
-    label: 'KVB (Latest)',
+    label: 'Karur Vysya Bank (Latest)',
     short: 'KVB Latest',
     group: 'kvb',
     description: 'Latest KVB statement format (Txn Date / Value Date / Ref. No).',

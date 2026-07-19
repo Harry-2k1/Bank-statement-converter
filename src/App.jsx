@@ -20,7 +20,7 @@ export default function App() {
       }}
     >
       <Container
-        maxWidth="md"
+        maxWidth="lg"
         sx={{
           flex: 1,
           display: 'flex',
