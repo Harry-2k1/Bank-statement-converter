@@ -804,3 +804,39 @@ export function extractTmbSummary(rawText) {
 
   return rows;
 }
+
+/**
+ * Extract Bank of Baroda REP31 ledger statement header details.
+ */
+export function extractBobSummary(rawText) {
+  const text = normalize(rawText);
+  const rows = [];
+
+  push(rows, 'Bank', 'Bank of Baroda');
+  push(rows, 'Report', field(text, /(REP31[^\n]*)/i));
+  push(
+    rows,
+    'Branch',
+    field(text, /Service\s+OutLet\s*:\s*\d+\s+([^\n]+)/i) ||
+      field(text, /BANK\s+OF\s+BARODA,?\s+([^,\n]+)/i),
+  );
+  push(
+    rows,
+    'Account No',
+    field(text, /Account\s+No\s*:\s*(\d+)/i) ||
+      field(text, /Acct\s+Range\s*:\s*(\d+)/i),
+  );
+  push(
+    rows,
+    'Account Holder',
+    field(text, /Account\s+No\s*:\s*\d+\s+INR\s+([^\n]+)/i),
+  );
+  push(rows, 'Currency', field(text, /Account\s+No\s*:\s*\d+\s+(INR)/i));
+  push(rows, 'Opening Balance', field(text, /Opening\s+Balance\s*:\s*([\d,]+\.\d{2})/i));
+  push(rows, 'Closing Balance', field(text, /Closing\s+Balance\s*:\s*([\d,]+\.\d{2})/i));
+  push(rows, 'Statement Period', field(text, /Period\s*:\s*([^\n]+)/i));
+  push(rows, 'Total Credit', field(text, /^Total\s+Credit\s*:\s*([\d,]+\.\d{2})/im));
+  push(rows, 'Total Debit', field(text, /^Total\s+Debit\s*:\s*([\d,]+\.\d{2})/im));
+
+  return rows;
+}

@@ -27,6 +27,7 @@ import {
 } from './parsers/federalMobileParser';
 import { parseDbsStatement, DBS_COLUMNS } from './parsers/dbsParser';
 import { parseTmbStatement, TMB_COLUMNS } from './parsers/tmbParser';
+import { parseBobStatement, BOB_COLUMNS } from './parsers/bobParser';
 import {
   extractHdfcSummary,
   extractIndianBankSummary,
@@ -44,6 +45,7 @@ import {
   extractFederalMobileSummary,
   extractDbsSummary,
   extractTmbSummary,
+  extractBobSummary,
 } from './parsers/summaryExtractor';
 import { exportTransactionsToExcel } from './excelExporter';
 
@@ -84,6 +86,14 @@ export const BANKS = {
     group: 'public',
     description: 'Canara Bank current/savings and OD account statements.',
     accent: '#0084C7',
+  },
+  bob: {
+    id: 'bob',
+    label: 'Bank of Baroda',
+    short: 'BOB',
+    group: 'public',
+    description: 'Bank of Baroda REP31 customer account ledger statements.',
+    accent: '#F15A22',
   },
   hdfc: {
     id: 'hdfc',
@@ -263,6 +273,11 @@ const BANK_HANDLERS = {
     parse: parseTmbStatement,
     columns: TMB_COLUMNS,
     summary: extractTmbSummary,
+  },
+  bob: {
+    parse: parseBobStatement,
+    columns: BOB_COLUMNS,
+    summary: extractBobSummary,
   },
 };
 
