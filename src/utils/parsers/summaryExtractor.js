@@ -691,12 +691,43 @@ export function extractFederalSummary(rawText) {
   push(rows, 'Account Holder', field(text, /^Name\s+([^\n]+)/im));
   push(rows, 'Account Number', field(text, /Account Number\s*:\s*(\d+)/i));
   push(rows, 'Customer Id', field(text, /Customer Id\s*:\s*(\d+)/i));
-  push(rows, 'Account Type', field(text, /Type of Account\s*:\s*([^\n]+)/i));
-  push(rows, 'Scheme', field(text, /Scheme\s*:\s*([^\n]+)/i));
+  push(rows, 'Account Type', field(text, /Type of Account\s*:\s*([^:]+?)(?:\s+Account Status\s*:)/i));
+  push(rows, 'Scheme', field(text, /Scheme\s*:\s*([^:]+?)(?:\s+Mode of Operation\s*:)/i));
   push(rows, 'IFSC', field(text, /IFSC\s*:\s*([A-Z0-9]+)/i));
   push(rows, 'MICR Code', field(text, /MICR Code\s*:\s*(\d+)/i));
   push(rows, 'Branch Name', field(text, /Branch Name\s*:\s*([^\n]+)/i));
   push(rows, 'Opening Balance', field(text, /Opening Balance\s*:\s*([\d,]+\.\d{2})/i));
+  push(
+    rows,
+    'Statement Period',
+    field(text, /Statement of Account for the period\s+([^\n]+)/i),
+  );
+
+  return rows;
+}
+
+/**
+ * Extract Federal Bank mobile app statement header details.
+ */
+export function extractFederalMobileSummary(rawText) {
+  const text = normalize(rawText);
+  const rows = [];
+
+  push(rows, 'Bank', 'Federal Bank');
+  push(rows, 'Format', 'Mobile');
+  push(
+    rows,
+    'Account Holder',
+    field(text, /Name\s*:\s*([^:]+?)(?:\s+Branch Name\s*:)/i),
+  );
+  push(rows, 'Account Number', field(text, /Account Number\s*:\s*(\d+)/i));
+  push(rows, 'Customer Id', field(text, /Customer Id\s*:\s*(\d+)/i));
+  push(rows, 'Account Type', field(text, /Type of Account\s*:\s*([^:]+?)(?:\s+Account Status\s*:)/i));
+  push(rows, 'Scheme', field(text, /Scheme\s*:\s*([^:]+?)(?:\s+Mode of Operation\s*:)/i));
+  push(rows, 'IFSC', field(text, /IFSC\s*:\s*([A-Z0-9]+)/i));
+  push(rows, 'MICR Code', field(text, /MICR Code\s*:\s*(\d+)/i));
+  push(rows, 'Branch Name', field(text, /Branch Name\s*:\s*([^\n]+)/i));
+  push(rows, 'Opening Balance', field(text, /^Opening Balance\s+([\d,]+\.\d{2})/im));
   push(
     rows,
     'Statement Period',

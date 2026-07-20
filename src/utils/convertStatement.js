@@ -21,6 +21,10 @@ import { parseCanaraStatement, CANARA_COLUMNS } from './parsers/canaraParser';
 import { parseCubStatement, CUB_COLUMNS } from './parsers/cubParser';
 import { parseSibStatement, SIB_COLUMNS } from './parsers/sibParser';
 import { parseFederalStatement, FEDERAL_COLUMNS } from './parsers/federalParser';
+import {
+  parseFederalMobileStatement,
+  FEDERAL_MOBILE_COLUMNS,
+} from './parsers/federalMobileParser';
 import { parseDbsStatement, DBS_COLUMNS } from './parsers/dbsParser';
 import { parseTmbStatement, TMB_COLUMNS } from './parsers/tmbParser';
 import {
@@ -37,6 +41,7 @@ import {
   extractCubSummary,
   extractSibSummary,
   extractFederalSummary,
+  extractFederalMobileSummary,
   extractDbsSummary,
   extractTmbSummary,
 } from './parsers/summaryExtractor';
@@ -119,6 +124,14 @@ export const BANKS = {
     group: 'private',
     description: 'Federal Bank savings/current account PDF statements.',
     accent: '#004F9F',
+  },
+  federalMobile: {
+    id: 'federalMobile',
+    label: 'Federal Bank (Mobile)',
+    short: 'Federal Mobile',
+    group: 'private',
+    description: 'Federal Bank mobile app statements (DD-MMM-YYYY, Tran ID).',
+    accent: '#003D7A',
   },
   dbs: {
     id: 'dbs',
@@ -235,6 +248,11 @@ const BANK_HANDLERS = {
     parse: parseFederalStatement,
     columns: FEDERAL_COLUMNS,
     summary: extractFederalSummary,
+  },
+  federalMobile: {
+    parse: parseFederalMobileStatement,
+    columns: FEDERAL_MOBILE_COLUMNS,
+    summary: extractFederalMobileSummary,
   },
   dbs: {
     parse: parseDbsStatement,
