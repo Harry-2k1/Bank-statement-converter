@@ -738,6 +738,45 @@ export function extractFederalMobileSummary(rawText) {
 }
 
 /**
+ * Extract Federal Bank latest/branch PDF statement header details.
+ */
+export function extractFederalLatestSummary(rawText) {
+  const text = normalize(rawText);
+  const rows = [];
+
+  push(rows, 'Bank', 'Federal Bank');
+  push(rows, 'Format', 'Latest');
+  push(
+    rows,
+    'Account Holder',
+    field(text, /^([^\n]+?)\s+Name/im) ||
+      field(text, /Name\s*:\s*([^:\n]+?)(?:\s+Communication Address\s*:)/i),
+  );
+  push(rows, 'Account Number', field(text, /Account Number\s*:\s*(\d+)/i));
+  push(rows, 'Customer Id', field(text, /Customer ID \(UCIC\)\s*(\d+)/i));
+  push(rows, 'Account Type', field(text, /Type Of Account\s*:\s*([^\n]+)/i));
+  push(rows, 'Scheme', field(text, /Scheme\s+([^\n]+)/i));
+  push(rows, 'IFSC', field(text, /IFSC\s*:\s*([A-Z0-9]+)/i));
+  push(rows, 'MICR Code', field(text, /MICR Code\s*:\s*(\d+)/i));
+  push(rows, 'Branch Name', field(text, /Branch Name\s+([^\n]+)/i));
+  push(rows, 'Opening Balance', field(text, /Opening Balance\s+CR\s+([\d,]+\.\d{2})/i));
+  push(
+    rows,
+    'Available Balance',
+    field(text, /Effective Available Balance\s*:\s*([\d,]+\.\d{2})/i),
+  );
+  push(
+    rows,
+    'Statement Period',
+    field(text, /Statement of Account for the period\s+([^\n]+)/i),
+  );
+  push(rows, 'Total Withdrawals', field(text, /GRAND TOTAL\s+([\d,]+\.\d{2})\s+[\d,]+\.\d{2}/i));
+  push(rows, 'Total Deposits', field(text, /GRAND TOTAL\s+[\d,]+\.\d{2}\s+([\d,]+\.\d{2})/i));
+
+  return rows;
+}
+
+/**
  * Extract DBS Bank India statement header details.
  */
 export function extractDbsSummary(rawText) {

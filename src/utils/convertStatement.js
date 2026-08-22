@@ -25,6 +25,11 @@ import {
   parseFederalMobileStatement,
   FEDERAL_MOBILE_COLUMNS,
 } from './parsers/federalMobileParser';
+import {
+  parseFederalLatestStatement,
+  FEDERAL_LATEST_COLUMNS,
+  isFederalLatestFormat,
+} from './parsers/federalLatestParser';
 import { parseDbsStatement, DBS_COLUMNS } from './parsers/dbsParser';
 import { parseTmbStatement, TMB_COLUMNS } from './parsers/tmbParser';
 import { parseBobStatement, BOB_COLUMNS } from './parsers/bobParser';
@@ -43,6 +48,7 @@ import {
   extractSibSummary,
   extractFederalSummary,
   extractFederalMobileSummary,
+  extractFederalLatestSummary,
   extractDbsSummary,
   extractTmbSummary,
   extractBobSummary,
@@ -132,8 +138,17 @@ export const BANKS = {
     label: 'Federal Bank',
     short: 'Federal',
     group: 'private',
-    description: 'Federal Bank savings/current account PDF statements.',
+    description:
+      'Federal Bank PDF statements (auto-detects desktop, latest branch, and mobile formats).',
     accent: '#004F9F',
+  },
+  federalLatest: {
+    id: 'federalLatest',
+    label: 'Federal Bank (Latest)',
+    short: 'Federal Latest',
+    group: 'private',
+    description: 'Federal Bank branch PDFs (DD-MM-YYYY, reversed column layout).',
+    accent: '#003870',
   },
   federalMobile: {
     id: 'federalMobile',
@@ -264,6 +279,11 @@ const BANK_HANDLERS = {
     columns: FEDERAL_MOBILE_COLUMNS,
     summary: extractFederalMobileSummary,
   },
+  federalLatest: {
+    parse: parseFederalLatestStatement,
+    columns: FEDERAL_LATEST_COLUMNS,
+    summary: extractFederalLatestSummary,
+  },
   dbs: {
     parse: parseDbsStatement,
     columns: DBS_COLUMNS,
@@ -280,6 +300,43 @@ const BANK_HANDLERS = {
     summary: extractBobSummary,
   },
 };
+
+function resolveFederalConversion(text) {
+  const desktopRows = parseFederalStatement(text);
+  if (desktopRows.length) {
+    return {
+      rows: desktopRows,
+      columns: FEDERAL_COLUMNS,
+      summary: extractFederalSummary(text),
+    };
+  }
+
+  if (isFederalLatestFormat(text)) {
+    const rows = parseFederalLatestStatement(text);
+    if (rows.length) {
+      return {
+        rows,
+        columns: FEDERAL_LATEST_COLUMNS,
+        summary: extractFederalLatestSummary(text),
+      };
+    }
+  }
+
+  const mobileRows = parseFederalMobileStatement(text);
+  if (mobileRows.length) {
+    return {
+      rows: mobileRows,
+      columns: FEDERAL_MOBILE_COLUMNS,
+      summary: extractFederalMobileSummary(text),
+    };
+  }
+
+  return {
+    rows: [],
+    columns: FEDERAL_COLUMNS,
+    summary: extractFederalSummary(text),
+  };
+}
 
 /**
  * Parse a bank statement PDF and download a formatted Excel file.
@@ -298,8 +355,20 @@ export async function convertStatementPdf(file, bankId) {
     throw new Error('Unsupported bank selected.');
   }
 
-  const rows = handler.parse(text);
-  const summaryDetails = handler.summary(text);
+  let rows;
+  let summaryDetails;
+  let columns;
+
+  if (bankId === 'federal') {
+    const resolved = resolveFederalConversion(text);
+    rows = resolved.rows;
+    summaryDetails = resolved.summary;
+    columns = resolved.columns;
+  } else {
+    rows = handler.parse(text);
+    summaryDetails = handler.summary(text);
+    columns = handler.columns;
+  }
 
   if (!rows.length) {
     throw new Error(
@@ -309,7 +378,7 @@ export async function convertStatementPdf(file, bankId) {
 
   exportTransactionsToExcel({
     rows,
-    columns: handler.columns,
+    columns,
     bankLabel: bank.label,
     fileName: file.name,
     summaryDetails,
@@ -318,7 +387,7 @@ export async function convertStatementPdf(file, bankId) {
   return {
     count: rows.length,
     preview: rows.slice(0, 8),
-    columns: handler.columns,
+    columns,
     bankLabel: bank.label,
     summaryDetails,
   };
