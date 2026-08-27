@@ -879,3 +879,77 @@ export function extractBobSummary(rawText) {
 
   return rows;
 }
+
+/**
+ * Extract ICICI Bank summary statement header details.
+ */
+export function extractIciciNewSummary(rawText) {
+  const text = normalize(rawText);
+  const rows = [];
+
+  push(rows, 'Bank', 'ICICI Bank');
+  push(rows, 'Format', 'Summary Statement');
+  push(rows, 'Account Type', field(text, /Type of Account\s+Account Number\s+(\w+)/i));
+  push(rows, 'Account Number', field(text, /Account Number\s+Balance[^\d]*(\d+)/i));
+  push(rows, 'IFSC', field(text, /IFSC\s+(\S+)/i));
+  push(rows, 'MICR', field(text, /MICR\s+(\d+)/i));
+  push(
+    rows,
+    'Account Holder',
+    field(text, /Your Details With Us:\s*([^\n]+)/i),
+  );
+  push(
+    rows,
+    'Statement Period',
+    field(text, /For the period\s+([^\n]+)/i),
+  );
+  push(rows, 'Closing Balance', field(text, /Summary of Account as on\s+([^\n]+)/i));
+
+  return rows;
+}
+
+/**
+ * Extract PF ECR challan summary details.
+ */
+export function extractPfEcrSummary(rawText) {
+  const text = normalize(rawText);
+  const rows = [];
+
+  push(rows, 'Form', 'EPF Electronic Challan cum Return (ECR)');
+  push(
+    rows,
+    'Establishment Name',
+    field(text, /Name of Establishment Establishment Id Wage Month Contribution Rate[^A-Z]*([A-Z][A-Z\s&\.]+?)\s+CBSLM/i),
+  );
+  push(rows, 'Establishment Id', field(text, /(CBSLM\d+)/));
+  push(rows, 'Wage Month', field(text, /CBSLM\d+\s+(\d{1,2}\s+[A-Z]{3}-\d{4})/i));
+  push(rows, 'Return Month', field(text, /ECR Type Return Month\s+\d+\s+ECR\s+([A-Z]{3}-\d{4})/i));
+  push(rows, 'LIN', field(text, /(\d{10})\s+ECR Type/i));
+  push(rows, 'Uploaded Date Time', field(text, /(\d{2}-[A-Z]{3}-\d{4}\s+\d{2}:\d{2})/i));
+  push(
+    rows,
+    'Salary Disbursement Date',
+    field(text, /Salary Disbursement Date\s+(\d{2}-[A-Z]{3}-\d{4})/i),
+  );
+  push(rows, 'TRRN Number', field(text, /TRRN Number ECR Id\s+(\d+)/i));
+  push(rows, 'Total Members', field(text, /Total Members\s+(\d+)/i));
+  push(
+    rows,
+    'Total EPF Contribution',
+    field(text, /Total EPF Contribution Remitted\s+([\d,]+)/i),
+  );
+  push(
+    rows,
+    'Total EPS Contribution',
+    field(text, /Total EPS Contribution Remitted\s+([\d,]+)/i),
+  );
+  push(
+    rows,
+    'Total EPF-EPS Contribution',
+    field(text, /Total EPF-EPS Contribution Remitted\s+([\d,]+)/i),
+  );
+  push(rows, 'Total Refund Advance', field(text, /Total Refund Advance\s+([\d,]+)/i));
+  push(rows, 'Exemption Status', field(text, /(Unexempted|Exempted)/i));
+
+  return rows;
+}

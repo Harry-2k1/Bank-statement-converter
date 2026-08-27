@@ -16,6 +16,12 @@ import {
   UNION_BANK_COLUMNS,
 } from './parsers/unionBankParser';
 import { parseIciciStatement, ICICI_COLUMNS } from './parsers/iciciParser';
+import {
+  parseIciciNewStatement,
+  ICICI_NEW_COLUMNS,
+  isIciciNewFormat,
+} from './parsers/iciciNewParser';
+import { parsePfEcrPdf, PF_ECR_COLUMNS } from './parsers/pfEcrParser';
 import { parseSbiStatement, SBI_COLUMNS } from './parsers/sbiParser';
 import { parseCanaraStatement, CANARA_COLUMNS } from './parsers/canaraParser';
 import { parseCubStatement, CUB_COLUMNS } from './parsers/cubParser';
@@ -42,6 +48,8 @@ import {
   extractAxisNeoSummary,
   extractUnionBankSummary,
   extractIciciSummary,
+  extractIciciNewSummary,
+  extractPfEcrSummary,
   extractSbiSummary,
   extractCanaraSummary,
   extractCubSummary,
@@ -58,6 +66,7 @@ import { exportTransactionsToExcel } from './excelExporter';
 export const BANK_GROUPS = [
   { id: 'public', label: 'Public sector banks' },
   { id: 'private', label: 'Private sector banks' },
+  { id: 'statutory', label: 'Statutory & compliance' },
 ];
 
 export const BANKS = {
@@ -114,8 +123,16 @@ export const BANKS = {
     label: 'ICICI Bank',
     short: 'ICICI',
     group: 'private',
-    description: 'ICICI detailed statement export with tran IDs and remarks.',
+    description: 'ICICI statements (auto-detects detailed and summary formats).',
     accent: '#F58220',
+  },
+  iciciNew: {
+    id: 'iciciNew',
+    label: 'ICICI Bank (Summary)',
+    short: 'ICICI Summary',
+    group: 'private',
+    description: 'ICICI summary statement (Date / Particulars / Withdrawals / Deposits).',
+    accent: '#E8740C',
   },
   cub: {
     id: 'cub',
@@ -206,6 +223,15 @@ export const BANKS = {
     description: 'Latest KVB statement format (Txn Date / Value Date / Ref. No).',
     accent: '#A3451F',
   },
+  pfEcr: {
+    id: 'pfEcr',
+    label: 'EPF ECR (Provident Fund)',
+    short: 'PF ECR',
+    group: 'statutory',
+    description: 'Employees Provident Fund Electronic Challan cum Return (ECR) PDF.',
+    accent: '#6B2D5C',
+    recordLabel: 'members',
+  },
 };
 
 const BANK_HANDLERS = {
@@ -248,6 +274,11 @@ const BANK_HANDLERS = {
     parse: parseIciciStatement,
     columns: ICICI_COLUMNS,
     summary: extractIciciSummary,
+  },
+  iciciNew: {
+    parse: parseIciciNewStatement,
+    columns: ICICI_NEW_COLUMNS,
+    summary: extractIciciNewSummary,
   },
   sbi: {
     parse: parseSbiStatement,
@@ -299,7 +330,32 @@ const BANK_HANDLERS = {
     columns: BOB_COLUMNS,
     summary: extractBobSummary,
   },
+  pfEcr: {
+    parseFromPdf: parsePfEcrPdf,
+    columns: PF_ECR_COLUMNS,
+    summary: extractPfEcrSummary,
+  },
 };
+
+function resolveIciciConversion(text) {
+  if (isIciciNewFormat(text)) {
+    const rows = parseIciciNewStatement(text);
+    if (rows.length) {
+      return {
+        rows,
+        columns: ICICI_NEW_COLUMNS,
+        summary: extractIciciNewSummary(text),
+      };
+    }
+  }
+
+  const rows = parseIciciStatement(text);
+  return {
+    rows,
+    columns: ICICI_COLUMNS,
+    summary: extractIciciSummary(text),
+  };
+}
 
 function resolveFederalConversion(text) {
   const desktopRows = parseFederalStatement(text);
@@ -342,12 +398,6 @@ function resolveFederalConversion(text) {
  * Parse a bank statement PDF and download a formatted Excel file.
  */
 export async function convertStatementPdf(file, bankId) {
-  const text = await extractTextFromPdf(file);
-
-  if (!text || text.trim().length < 40) {
-    throw new Error('Could not read text from this PDF. It may be scanned or image-only.');
-  }
-
   const bank = BANKS[bankId];
   const handler = BANK_HANDLERS[bankId];
 
@@ -359,20 +409,39 @@ export async function convertStatementPdf(file, bankId) {
   let summaryDetails;
   let columns;
 
-  if (bankId === 'federal') {
-    const resolved = resolveFederalConversion(text);
-    rows = resolved.rows;
-    summaryDetails = resolved.summary;
-    columns = resolved.columns;
-  } else {
-    rows = handler.parse(text);
-    summaryDetails = handler.summary(text);
+  if (handler.parseFromPdf) {
+    const parsed = await handler.parseFromPdf(file);
+    rows = parsed.rows;
+    summaryDetails = handler.summary(parsed.headerText || '');
     columns = handler.columns;
+  } else {
+    const text = await extractTextFromPdf(file);
+
+    if (!text || text.trim().length < 40) {
+      throw new Error('Could not read text from this PDF. It may be scanned or image-only.');
+    }
+
+    if (bankId === 'federal') {
+      const resolved = resolveFederalConversion(text);
+      rows = resolved.rows;
+      summaryDetails = resolved.summary;
+      columns = resolved.columns;
+    } else if (bankId === 'icici') {
+      const resolved = resolveIciciConversion(text);
+      rows = resolved.rows;
+      summaryDetails = resolved.summary;
+      columns = resolved.columns;
+    } else {
+      rows = handler.parse(text);
+      summaryDetails = handler.summary(text);
+      columns = handler.columns;
+    }
   }
 
   if (!rows.length) {
+    const unit = bank.recordLabel || 'transactions';
     throw new Error(
-      `No transactions were detected for ${bank.label}. Confirm you selected the correct bank.`,
+      `No ${unit} were detected for ${bank.label}. Confirm you selected the correct format.`,
     );
   }
 
@@ -390,5 +459,6 @@ export async function convertStatementPdf(file, bankId) {
     columns,
     bankLabel: bank.label,
     summaryDetails,
+    recordLabel: bank.recordLabel || 'transactions',
   };
 }

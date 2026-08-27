@@ -157,10 +157,10 @@ export default function BankSelector({ onSelect }) {
       >
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Typography variant="subtitle2" sx={{ fontWeight: 700, fontSize: '0.9rem' }}>
-            Select your bank
+            Select a format
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            Full bank name shown — pick the format that matches your PDF
+            Bank statements, PF ECR, and other PDF exports
           </Typography>
         </Box>
         <TextField

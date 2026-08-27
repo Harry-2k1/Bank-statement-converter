@@ -51,7 +51,7 @@ export default function App() {
               Statement Converter
             </Typography>
             <Typography variant="caption" color="text.secondary" sx={{ lineHeight: 1.4 }}>
-              PDF → Excel · {BANK_COUNT} banks · runs locally
+              PDF → Excel · {BANK_COUNT} formats · runs locally
             </Typography>
           </Box>
         </Stack>
@@ -86,7 +86,7 @@ export default function App() {
           flexShrink: 0,
         }}
       >
-        Processing stays in your browser — pick the bank format that matches your PDF.
+        Processing stays in your browser — pick the format that matches your PDF.
       </Typography>
     </Box>
   );

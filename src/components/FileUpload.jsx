@@ -212,7 +212,7 @@ export default function FileUpload({ bankId, onBack }) {
       {result && (
         <Alert severity="success" sx={{ py: 0.5, fontSize: '0.8rem' }}>
           <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            {result.count} transactions converted — Excel downloaded.
+            {result.count} {result.recordLabel || 'transactions'} converted — Excel downloaded.
           </Typography>
         </Alert>
       )}
