@@ -21,6 +21,11 @@ import {
   ICICI_NEW_COLUMNS,
   isIciciNewFormat,
 } from './parsers/iciciNewParser';
+import {
+  parseIciciOpHistoryStatement,
+  ICICI_OP_HISTORY_COLUMNS,
+  isIciciOpHistoryFormat,
+} from './parsers/iciciOpHistoryParser';
 import { parsePfEcrPdf, PF_ECR_COLUMNS } from './parsers/pfEcrParser';
 import { parseSbiStatement, SBI_COLUMNS } from './parsers/sbiParser';
 import { parseCanaraStatement, CANARA_COLUMNS } from './parsers/canaraParser';
@@ -49,6 +54,7 @@ import {
   extractUnionBankSummary,
   extractIciciSummary,
   extractIciciNewSummary,
+  extractIciciOpHistorySummary,
   extractPfEcrSummary,
   extractSbiSummary,
   extractCanaraSummary,
@@ -123,7 +129,7 @@ export const BANKS = {
     label: 'ICICI Bank',
     short: 'ICICI',
     group: 'private',
-    description: 'ICICI statements (auto-detects detailed and summary formats).',
+    description: 'ICICI statements (auto-detects detailed, summary, and op history formats).',
     accent: '#F58220',
   },
   iciciNew: {
@@ -133,6 +139,14 @@ export const BANKS = {
     group: 'private',
     description: 'ICICI summary statement (Date / Particulars / Withdrawals / Deposits).',
     accent: '#E8740C',
+  },
+  iciciOpHistory: {
+    id: 'iciciOpHistory',
+    label: 'ICICI Bank (Op History)',
+    short: 'ICICI Op History',
+    group: 'private',
+    description: 'ICICI savings OpTransactionHistory export (DD.MM.YYYY).',
+    accent: '#D4610A',
   },
   cub: {
     id: 'cub',
@@ -280,6 +294,11 @@ const BANK_HANDLERS = {
     columns: ICICI_NEW_COLUMNS,
     summary: extractIciciNewSummary,
   },
+  iciciOpHistory: {
+    parse: parseIciciOpHistoryStatement,
+    columns: ICICI_OP_HISTORY_COLUMNS,
+    summary: extractIciciOpHistorySummary,
+  },
   sbi: {
     parse: parseSbiStatement,
     columns: SBI_COLUMNS,
@@ -338,6 +357,17 @@ const BANK_HANDLERS = {
 };
 
 function resolveIciciConversion(text) {
+  if (isIciciOpHistoryFormat(text)) {
+    const rows = parseIciciOpHistoryStatement(text);
+    if (rows.length) {
+      return {
+        rows,
+        columns: ICICI_OP_HISTORY_COLUMNS,
+        summary: extractIciciOpHistorySummary(text),
+      };
+    }
+  }
+
   if (isIciciNewFormat(text)) {
     const rows = parseIciciNewStatement(text);
     if (rows.length) {

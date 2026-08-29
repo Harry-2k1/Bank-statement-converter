@@ -909,6 +909,35 @@ export function extractIciciNewSummary(rawText) {
 }
 
 /**
+ * Extract ICICI Bank OpTransactionHistory statement header details.
+ */
+export function extractIciciOpHistorySummary(rawText) {
+  const text = normalize(rawText);
+  const rows = [];
+
+  push(rows, 'Bank', 'ICICI Bank');
+  push(rows, 'Format', 'OpTransactionHistory');
+  push(rows, 'Account Holder', field(text, /^\s*([A-Z][A-Z\s\.]+)\s*, , , , , IN,/m));
+  push(
+    rows,
+    'Account Number',
+    field(text, /Saving Account no\.\s*(\d+)/i),
+  );
+  push(
+    rows,
+    'Statement Period',
+    field(text, /for the period\s+([^\n]+)/i),
+  );
+  push(
+    rows,
+    'Base Branch',
+    field(text, /Your Base Branch:\s*([^\n]+?)(?:\s+Never share)/i),
+  );
+
+  return rows;
+}
+
+/**
  * Extract PF ECR challan summary details.
  */
 export function extractPfEcrSummary(rawText) {
