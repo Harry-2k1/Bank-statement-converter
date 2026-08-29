@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Box, Container, Typography, Stack } from '@mui/material';
 import BankSelector from './components/BankSelector';
 import FileUpload from './components/FileUpload';
-import { BANKS } from './utils/convertStatement';
+import { BANKS } from './utils/bankConfig';
 
 const BANK_COUNT = Object.keys(BANKS).length;
 

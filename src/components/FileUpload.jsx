@@ -12,7 +12,7 @@ import CloudUploadRoundedIcon from '@mui/icons-material/CloudUploadRounded';
 import PictureAsPdfRoundedIcon from '@mui/icons-material/PictureAsPdfRounded';
 import ArrowBackRoundedIcon from '@mui/icons-material/ArrowBackRounded';
 import DownloadRoundedIcon from '@mui/icons-material/DownloadRounded';
-import { BANKS, convertStatementPdf } from '../utils/convertStatement';
+import { BANKS } from '../utils/bankConfig';
 
 function formatBytes(bytes) {
   if (!bytes) return '0 B';
@@ -49,7 +49,8 @@ export default function FileUpload({ bankId, onBack }) {
     acceptFile(dropped);
   };
 
-  const handleConvert = async () => {
+  const handleConvert = async (event) => {
+    event?.stopPropagation?.();
     if (!file) {
       setError('Select a PDF statement first.');
       return;
@@ -58,9 +59,11 @@ export default function FileUpload({ bankId, onBack }) {
     setError('');
     setResult(null);
     try {
+      const { convertStatementPdf } = await import('../utils/convertStatement.js');
       const converted = await convertStatementPdf(file, bankId);
       setResult(converted);
     } catch (err) {
+      console.error('Conversion failed:', err);
       setError(err?.message || 'Conversion failed. Please try another file.');
     } finally {
       setLoading(false);

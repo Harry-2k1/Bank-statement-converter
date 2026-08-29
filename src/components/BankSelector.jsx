@@ -11,7 +11,7 @@ import {
 import AccountBalanceRoundedIcon from '@mui/icons-material/AccountBalanceRounded';
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded';
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded';
-import { BANKS, BANK_GROUPS } from '../utils/convertStatement';
+import { BANKS, BANK_GROUPS } from '../utils/bankConfig';
 
 function shouldShowShort(bank) {
   if (!bank.short) return false;

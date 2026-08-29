@@ -68,185 +68,9 @@ import {
   extractBobSummary,
 } from './parsers/summaryExtractor';
 import { exportTransactionsToExcel } from './excelExporter';
+import { BANKS, BANK_GROUPS } from './bankConfig';
 
-export const BANK_GROUPS = [
-  { id: 'public', label: 'Public sector banks' },
-  { id: 'private', label: 'Private sector banks' },
-  { id: 'statutory', label: 'Statutory & compliance' },
-];
-
-export const BANKS = {
-  sbi: {
-    id: 'sbi',
-    label: 'State Bank of India',
-    short: 'SBI',
-    group: 'public',
-    description: 'SBI account statement PDFs with multi-line transaction details.',
-    accent: '#22409A',
-  },
-  indian: {
-    id: 'indian',
-    label: 'Indian Bank',
-    short: 'Indian Bank',
-    group: 'public',
-    description: 'Indian Bank account statement PDFs into Excel.',
-    accent: '#B71C1C',
-  },
-  union: {
-    id: 'union',
-    label: 'Union Bank of India',
-    short: 'Union Bank',
-    group: 'public',
-    description: 'Union Bank of India account statement PDFs into Excel.',
-    accent: '#0051A5',
-  },
-  canara: {
-    id: 'canara',
-    label: 'Canara Bank',
-    short: 'Canara',
-    group: 'public',
-    description: 'Canara Bank current/savings and OD account statements.',
-    accent: '#0084C7',
-  },
-  bob: {
-    id: 'bob',
-    label: 'Bank of Baroda',
-    short: 'BOB',
-    group: 'public',
-    description: 'Bank of Baroda REP31 customer account ledger statements.',
-    accent: '#F15A22',
-  },
-  hdfc: {
-    id: 'hdfc',
-    label: 'HDFC Bank',
-    short: 'HDFC',
-    group: 'private',
-    description: 'HDFC account statement PDFs into Excel.',
-    accent: '#004C8F',
-  },
-  icici: {
-    id: 'icici',
-    label: 'ICICI Bank',
-    short: 'ICICI',
-    group: 'private',
-    description: 'ICICI statements (auto-detects detailed, summary, and op history formats).',
-    accent: '#F58220',
-  },
-  iciciNew: {
-    id: 'iciciNew',
-    label: 'ICICI Bank (Summary)',
-    short: 'ICICI Summary',
-    group: 'private',
-    description: 'ICICI summary statement (Date / Particulars / Withdrawals / Deposits).',
-    accent: '#E8740C',
-  },
-  iciciOpHistory: {
-    id: 'iciciOpHistory',
-    label: 'ICICI Bank (Op History)',
-    short: 'ICICI Op History',
-    group: 'private',
-    description: 'ICICI savings OpTransactionHistory export (DD.MM.YYYY).',
-    accent: '#D4610A',
-  },
-  cub: {
-    id: 'cub',
-    label: 'City Union Bank (CUB)',
-    short: 'CUB',
-    group: 'private',
-    description: 'City Union Bank account statements (balance-first format).',
-    accent: '#1B365D',
-  },
-  sib: {
-    id: 'sib',
-    label: 'South Indian Bank (SIB)',
-    short: 'SIB',
-    group: 'private',
-    description: 'South Indian Bank statements (particulars + date format).',
-    accent: '#0054A6',
-  },
-  federal: {
-    id: 'federal',
-    label: 'Federal Bank',
-    short: 'Federal',
-    group: 'private',
-    description:
-      'Federal Bank PDF statements (auto-detects desktop, latest branch, and mobile formats).',
-    accent: '#004F9F',
-  },
-  federalLatest: {
-    id: 'federalLatest',
-    label: 'Federal Bank (Latest)',
-    short: 'Federal Latest',
-    group: 'private',
-    description: 'Federal Bank branch PDFs (DD-MM-YYYY, reversed column layout).',
-    accent: '#003870',
-  },
-  federalMobile: {
-    id: 'federalMobile',
-    label: 'Federal Bank (Mobile)',
-    short: 'Federal Mobile',
-    group: 'private',
-    description: 'Federal Bank mobile app statements (DD-MMM-YYYY, Tran ID).',
-    accent: '#003D7A',
-  },
-  dbs: {
-    id: 'dbs',
-    label: 'DBS Bank India',
-    short: 'DBS',
-    group: 'private',
-    description: 'DBS Bank India digibank account statements.',
-    accent: '#C02026',
-  },
-  tmb: {
-    id: 'tmb',
-    label: 'Tamilnad Mercantile Bank (TMB)',
-    short: 'TMB',
-    group: 'private',
-    description: 'TMB internet banking transaction list exports (OD/current).',
-    accent: '#006B3F',
-  },
-  axis: {
-    id: 'axis',
-    label: 'Axis Bank (Retail)',
-    short: 'Axis Retail',
-    group: 'private',
-    description: 'Standard Axis retail/corporate statement (Tran Date format).',
-    accent: '#97144D',
-  },
-  axisNeo: {
-    id: 'axisNeo',
-    label: 'Axis Bank (Neo)',
-    short: 'Axis Neo',
-    group: 'private',
-    description: 'Axis Neo corporate statements (DD/MM/YYYY, DR/CR columns).',
-    accent: '#7B1040',
-  },
-  kvb: {
-    id: 'kvb',
-    label: 'Karur Vysya Bank (Classic)',
-    short: 'KVB Classic',
-    group: 'private',
-    description: 'Older KVB online statement format (Transaction Date with time).',
-    accent: '#C45C26',
-  },
-  kvbLatest: {
-    id: 'kvbLatest',
-    label: 'Karur Vysya Bank (Latest)',
-    short: 'KVB Latest',
-    group: 'private',
-    description: 'Latest KVB statement format (Txn Date / Value Date / Ref. No).',
-    accent: '#A3451F',
-  },
-  pfEcr: {
-    id: 'pfEcr',
-    label: 'EPF ECR (Provident Fund)',
-    short: 'PF ECR',
-    group: 'statutory',
-    description: 'Employees Provident Fund Electronic Challan cum Return (ECR) PDF.',
-    accent: '#6B2D5C',
-    recordLabel: 'members',
-  },
-};
+export { BANKS, BANK_GROUPS };
 
 const BANK_HANDLERS = {
   hdfc: {
@@ -439,33 +263,46 @@ export async function convertStatementPdf(file, bankId) {
   let summaryDetails;
   let columns;
 
-  if (handler.parseFromPdf) {
-    const parsed = await handler.parseFromPdf(file);
-    rows = parsed.rows;
-    summaryDetails = handler.summary(parsed.headerText || '');
-    columns = handler.columns;
-  } else {
-    const text = await extractTextFromPdf(file);
-
-    if (!text || text.trim().length < 40) {
-      throw new Error('Could not read text from this PDF. It may be scanned or image-only.');
-    }
-
-    if (bankId === 'federal') {
-      const resolved = resolveFederalConversion(text);
-      rows = resolved.rows;
-      summaryDetails = resolved.summary;
-      columns = resolved.columns;
-    } else if (bankId === 'icici') {
-      const resolved = resolveIciciConversion(text);
-      rows = resolved.rows;
-      summaryDetails = resolved.summary;
-      columns = resolved.columns;
-    } else {
-      rows = handler.parse(text);
-      summaryDetails = handler.summary(text);
+  try {
+    if (handler.parseFromPdf) {
+      const parsed = await handler.parseFromPdf(file);
+      rows = parsed.rows;
+      summaryDetails = handler.summary(parsed.headerText || '');
       columns = handler.columns;
+    } else {
+      const text = await extractTextFromPdf(file);
+
+      if (!text || text.trim().length < 40) {
+        throw new Error('Could not read text from this PDF. It may be scanned or image-only.');
+      }
+
+      if (bankId === 'federal') {
+        const resolved = resolveFederalConversion(text);
+        rows = resolved.rows;
+        summaryDetails = resolved.summary;
+        columns = resolved.columns;
+      } else if (bankId === 'icici') {
+        const resolved = resolveIciciConversion(text);
+        rows = resolved.rows;
+        summaryDetails = resolved.summary;
+        columns = resolved.columns;
+      } else {
+        rows = handler.parse(text);
+        summaryDetails = handler.summary(text);
+        columns = handler.columns;
+      }
     }
+  } catch (err) {
+    const message = err?.message || String(err);
+    if (/worker|pdfjs|GlobalWorkerOptions/i.test(message)) {
+      throw new Error(
+        'PDF reader failed to start. Refresh the page and try again in Chrome, Edge, or Firefox.',
+      );
+    }
+    if (/Invalid PDF|password|encrypted/i.test(message)) {
+      throw new Error('This PDF could not be opened. Check that it is not password-protected.');
+    }
+    throw err;
   }
 
   if (!rows.length) {

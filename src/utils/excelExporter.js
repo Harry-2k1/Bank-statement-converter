@@ -1,5 +1,7 @@
 import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
+import FileSaver from 'file-saver';
+
+const saveAs = FileSaver.saveAs ?? FileSaver;
 
 function formatCell(value) {
   if (value === null || value === undefined || value === '') return '';
