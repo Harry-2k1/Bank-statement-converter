@@ -4,6 +4,11 @@ import {
   parseIndianBankStatement,
   INDIAN_BANK_COLUMNS,
 } from './parsers/indianBankParser';
+import {
+  parseIndianBankActivityStatement,
+  INDIAN_BANK_ACTIVITY_COLUMNS,
+  isIndianBankActivityFormat,
+} from './parsers/indianBankActivityParser';
 import { parseKvbStatement, KVB_COLUMNS } from './parsers/kvbParser';
 import {
   parseKvbLatestStatement,
@@ -180,6 +185,26 @@ const BANK_HANDLERS = {
   },
 };
 
+function resolveIndianConversion(text) {
+  if (isIndianBankActivityFormat(text)) {
+    const rows = parseIndianBankActivityStatement(text);
+    if (rows.length) {
+      return {
+        rows,
+        columns: INDIAN_BANK_ACTIVITY_COLUMNS,
+        summary: extractIndianBankSummary(text),
+      };
+    }
+  }
+
+  const rows = parseIndianBankStatement(text);
+  return {
+    rows,
+    columns: INDIAN_BANK_COLUMNS,
+    summary: extractIndianBankSummary(text),
+  };
+}
+
 function resolveIciciConversion(text) {
   if (isIciciOpHistoryFormat(text)) {
     const rows = parseIciciOpHistoryStatement(text);
@@ -283,6 +308,11 @@ export async function convertStatementPdf(file, bankId) {
         columns = resolved.columns;
       } else if (bankId === 'icici') {
         const resolved = resolveIciciConversion(text);
+        rows = resolved.rows;
+        summaryDetails = resolved.summary;
+        columns = resolved.columns;
+      } else if (bankId === 'indian') {
+        const resolved = resolveIndianConversion(text);
         rows = resolved.rows;
         summaryDetails = resolved.summary;
         columns = resolved.columns;

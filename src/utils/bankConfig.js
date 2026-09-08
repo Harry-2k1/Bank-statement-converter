@@ -18,7 +18,7 @@ export const BANKS = {
     label: 'Indian Bank',
     short: 'Indian Bank',
     group: 'public',
-    description: 'Indian Bank account statement PDFs into Excel.',
+    description: 'Indian Bank statements (auto-detects classic ledger and account activity formats).',
     accent: '#B71C1C',
   },
   union: {

@@ -28,6 +28,10 @@ function push(rows, label, value) {
  * Extract Indian Bank statement header / account details for the Summary sheet.
  */
 export function extractIndianBankSummary(rawText) {
+  if (/ACCOUNT ACTIVITY/i.test(rawText)) {
+    return extractIndianBankActivitySummary(rawText);
+  }
+
   const text = normalize(rawText);
   const rows = [];
 
@@ -92,6 +96,39 @@ export function extractIndianBankSummary(rawText) {
     ]),
   );
   push(rows, 'Statement Time', field(text, new RegExp(`Statement\\s*Time\\s*:${V}`, 'i')));
+
+  return rows;
+}
+
+/**
+ * Extract Indian Bank "Account Activity" statement header details.
+ */
+export function extractIndianBankActivitySummary(rawText) {
+  const text = normalize(rawText);
+  const rows = [];
+
+  push(rows, 'Bank', 'Indian Bank');
+  push(rows, 'Format', 'Account Activity');
+  push(rows, 'Account Holder', field(text, /Account Holder Name\s+([\s\S]+?)\s+Account Type\s+/i));
+  push(rows, 'Account Type', field(text, /Account Type\s+([^\n]+)/i));
+  push(rows, 'Account Number', field(text, /Account Number\s+(\d+)/i));
+  push(rows, 'Branch Name', field(text, /Branch Name\s+([^\n]+)/i));
+  push(rows, 'IFSC', field(text, /\bIFSC\s+([A-Z0-9]+)/i));
+  push(rows, 'Currency', field(text, /Account Currency\s+([A-Z]+)/i));
+  push(rows, 'Statement Period', field(text, /For period:\s*([^\n]+)/i));
+  push(rows, 'Opening Balance', field(text, /Opening Balance\s+INR\s+([\d,]+\.\d{2}\s*CR)/i));
+  push(rows, 'Total Credits', field(text, /Total Credits\s+\+\s*INR\s+([\d,]+\.\d{2})/i));
+  push(rows, 'Total Debits', field(text, /Total Debits\s+-\s*INR\s+([\d,]+\.\d{2})/i));
+  push(
+    rows,
+    'Closing Balance',
+    field(text, /Ending Balance\s+INR\s+([\d,]+\.\d{2}\s*CR)/i),
+  );
+
+  const address = field(text, /Customer'?s Address\s+([\s\S]+?)(?:Branch Name)/i);
+  if (address) {
+    push(rows, 'Address', address.replace(/\s+/g, ' ').trim());
+  }
 
   return rows;
 }
