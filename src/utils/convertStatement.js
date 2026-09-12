@@ -49,6 +49,7 @@ import {
 import { parseDbsStatement, DBS_COLUMNS } from './parsers/dbsParser';
 import { parseTmbStatement, TMB_COLUMNS } from './parsers/tmbParser';
 import { parseBobStatement, BOB_COLUMNS } from './parsers/bobParser';
+import { parseIobStatement, IOB_COLUMNS } from './parsers/iobParser';
 import {
   extractHdfcSummary,
   extractIndianBankSummary,
@@ -71,6 +72,7 @@ import {
   extractDbsSummary,
   extractTmbSummary,
   extractBobSummary,
+  extractIobSummary,
 } from './parsers/summaryExtractor';
 import { exportTransactionsToExcel } from './excelExporter';
 import { BANKS, BANK_GROUPS } from './bankConfig';
@@ -177,6 +179,11 @@ const BANK_HANDLERS = {
     parse: parseBobStatement,
     columns: BOB_COLUMNS,
     summary: extractBobSummary,
+  },
+  iob: {
+    parse: parseIobStatement,
+    columns: IOB_COLUMNS,
+    summary: extractIobSummary,
   },
   pfEcr: {
     parseFromPdf: parsePfEcrPdf,

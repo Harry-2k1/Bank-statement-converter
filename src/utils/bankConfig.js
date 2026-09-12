@@ -45,6 +45,14 @@ export const BANKS = {
     description: 'Bank of Baroda REP31 customer account ledger statements.',
     accent: '#F15A22',
   },
+  iob: {
+    id: 'iob',
+    label: 'Indian Overseas Bank',
+    short: 'IOB',
+    group: 'public',
+    description: 'Indian Overseas Bank REP27 account statements (DD-MM-YYYY).',
+    accent: '#005A8C',
+  },
   hdfc: {
     id: 'hdfc',
     label: 'HDFC Bank',

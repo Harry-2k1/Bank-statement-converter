@@ -918,6 +918,61 @@ export function extractBobSummary(rawText) {
 }
 
 /**
+ * Extract Indian Overseas Bank (REP27) statement header details.
+ */
+export function extractIobSummary(rawText) {
+  const text = normalize(rawText);
+  const rows = [];
+
+  push(rows, 'Bank', 'Indian Overseas Bank');
+  push(rows, 'Report', field(text, /(REP27[^\n]*)/i));
+  push(
+    rows,
+    'Branch',
+    field(text, /INDIAN OVERSEAS BANK,\s*([^\n]+?)(?:\s+Page|\s+REP27)/i) ||
+      field(text, /Service OutLet\s*:\s*\d+\s+([^\n]+)/i),
+  );
+  push(
+    rows,
+    'Account Number',
+    field(text, /Account Number\s*:\s*(\d+)/i),
+  );
+  push(
+    rows,
+    'Account Holder',
+    field(text, /Account Number\s*:\s*\d+\/\w+\s+([^\n]+)/i),
+  );
+  push(rows, 'Currency', field(text, /Account Number\s*:\s*\d+\/(\w+)/i));
+  push(
+    rows,
+    'Statement Period',
+    field(text, /Report(?:\s+for the)?\s+Period\s*:\s*([^\n]+)/i),
+  );
+  push(
+    rows,
+    'Opening Balance',
+    field(text, /Account\s+Opening\s+balance\s*:\s*([\d,]+\.\d{2}\s*CR?)/i),
+  );
+  push(
+    rows,
+    'Closing Balance',
+    field(text, /Total\(Curr\.\s*\w+\)\s*:\s*[\d,]+\.\d{2}\s+[\d,]+\.\d{2}\s+([\d,]+\.\d{2}\s*CR?)/i),
+  );
+  push(
+    rows,
+    'Total Debit',
+    field(text, /Total\(Curr\.\s*\w+\)\s*:\s*([\d,]+\.\d{2})/i),
+  );
+  push(
+    rows,
+    'Total Credit',
+    field(text, /Total\(Curr\.\s*\w+\)\s*:\s*[\d,]+\.\d{2}\s+([\d,]+\.\d{2})/i),
+  );
+
+  return rows;
+}
+
+/**
  * Extract ICICI Bank summary statement header details.
  */
 export function extractIciciNewSummary(rawText) {
