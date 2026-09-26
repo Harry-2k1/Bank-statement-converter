@@ -46,6 +46,11 @@ import {
   FEDERAL_LATEST_COLUMNS,
   isFederalLatestFormat,
 } from './parsers/federalLatestParser';
+import {
+  parseFederalAccountStatement,
+  FEDERAL_ACCOUNT_COLUMNS,
+  isFederalAccountFormat,
+} from './parsers/federalAccountParser';
 import { parseDbsStatement, DBS_COLUMNS } from './parsers/dbsParser';
 import { parseTmbStatement, TMB_COLUMNS } from './parsers/tmbParser';
 import { parseBobStatement, BOB_COLUMNS } from './parsers/bobParser';
@@ -68,6 +73,7 @@ import {
   extractSibSummary,
   extractFederalSummary,
   extractFederalMobileSummary,
+  extractFederalAccountSummary,
   extractFederalLatestSummary,
   extractDbsSummary,
   extractTmbSummary,
@@ -159,6 +165,11 @@ const BANK_HANDLERS = {
     parse: parseFederalMobileStatement,
     columns: FEDERAL_MOBILE_COLUMNS,
     summary: extractFederalMobileSummary,
+  },
+  federalAccount: {
+    parse: parseFederalAccountStatement,
+    columns: FEDERAL_ACCOUNT_COLUMNS,
+    summary: extractFederalAccountSummary,
   },
   federalLatest: {
     parse: parseFederalLatestStatement,
@@ -260,6 +271,17 @@ function resolveFederalConversion(text) {
         rows,
         columns: FEDERAL_LATEST_COLUMNS,
         summary: extractFederalLatestSummary(text),
+      };
+    }
+  }
+
+  if (isFederalAccountFormat(text)) {
+    const rows = parseFederalAccountStatement(text);
+    if (rows.length) {
+      return {
+        rows,
+        columns: FEDERAL_ACCOUNT_COLUMNS,
+        summary: extractFederalAccountSummary(text),
       };
     }
   }

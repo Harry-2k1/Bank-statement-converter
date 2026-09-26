@@ -775,6 +775,67 @@ export function extractFederalMobileSummary(rawText) {
 }
 
 /**
+ * Extract Federal Bank account statement PDF header details (Sl No layout).
+ */
+export function extractFederalAccountSummary(rawText) {
+  const text = normalize(rawText);
+  const rows = [];
+
+  push(rows, 'Bank', 'Federal Bank');
+  push(rows, 'Format', 'Account Statement');
+  push(
+    rows,
+    'Account Holder',
+    field(text, /^Name\s*:\s*([^:]+?)(?:\s+Branch Name\s*:)/im),
+  );
+  push(
+    rows,
+    'Account Number',
+    field(text, /Account Number\s*:\s*([^\s]+)/i),
+  );
+  push(rows, 'Customer Id', field(text, /Customer ID\s*:\s*(\d+)/i));
+  push(
+    rows,
+    'Account Type',
+    field(text, /Type Of Account\s*:\s*([^:]+?)(?:\s+Mode Of Operation\s*:)/i),
+  );
+  push(
+    rows,
+    'Scheme',
+    field(text, /Scheme\s*:\s*([^:]+?)(?:\s+Joint Holders\s*:)/i),
+  );
+  push(rows, 'IFSC', field(text, /IFSC\s*:\s*([A-Z0-9]+)/i));
+  push(rows, 'MICR Code', field(text, /MICR Code\s*:\s*(\d+)/i));
+  push(
+    rows,
+    'Branch Name',
+    field(text, /Branch Name\s*:\s*([^:\n]+?)(?:\s+Branch Sol ID\s*:)/i),
+  );
+  push(
+    rows,
+    'Available Balance',
+    field(text, /Effective Available Balance\s*:\s*([\d,]+\.\d{2})/i),
+  );
+  push(
+    rows,
+    'Statement Period',
+    field(text, /Statement Of Account For The Period\s+([^\n]+)/i),
+  );
+  push(
+    rows,
+    'Total Withdrawals',
+    field(text, /GRAND TOTAL\s+([\d,]+\.?\d*)/i),
+  );
+  push(
+    rows,
+    'Total Deposits',
+    field(text, /GRAND TOTAL\s+[\d,]+\.?\d*\s*([\d,]+\.?\d*)/i),
+  );
+
+  return rows;
+}
+
+/**
  * Extract Federal Bank latest/branch PDF statement header details.
  */
 export function extractFederalLatestSummary(rawText) {

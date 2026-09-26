@@ -107,8 +107,16 @@ export const BANKS = {
     short: 'Federal',
     group: 'private',
     description:
-      'Federal Bank PDF statements (auto-detects desktop, latest branch, and mobile formats).',
+      'Federal Bank PDF statements (auto-detects desktop, account, latest branch, and mobile formats).',
     accent: '#004F9F',
+  },
+  federalAccount: {
+    id: 'federalAccount',
+    label: 'Federal Bank (Account)',
+    short: 'Federal Account',
+    group: 'private',
+    description: 'Federal Bank net-banking account statements (Sl No, DD-MMM-YYYY).',
+    accent: '#003870',
   },
   federalLatest: {
     id: 'federalLatest',
