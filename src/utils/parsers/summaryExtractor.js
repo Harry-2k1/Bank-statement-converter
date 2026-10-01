@@ -587,6 +587,20 @@ export function extractCanaraSummary(rawText) {
   const rows = [];
 
   push(rows, 'Bank', 'Canara Bank');
+
+  if (/STATEMENT OF ACCOUNT/i.test(text)) {
+    push(rows, 'Account Holder', field(text, /Customer Name\s*:\s*([^\n]+)/i));
+    push(rows, 'Account Number', field(text, /Account No\s*:\s*(\d+)/i));
+    push(rows, 'Customer Id', field(text, /Customer ID\s*:\s*(\d+)/i));
+    push(rows, 'Branch Name', field(text, /Account Branch\s*:\s*(\d+-[^\n]+)/i));
+    push(rows, 'IFSC Code', field(text, /IFSC\s*:\s*([A-Z0-9]+)/i));
+    push(rows, 'MICR Code', field(text, /MICR\s*:\s*(\d+)/i));
+    push(rows, 'Product Name', field(text, /Product Name\s*:\s*([^\n]+)/i));
+    push(rows, 'Statement Period', field(text, /Period\s*:\s*([^\n]+)/i));
+    push(rows, 'Statement As Of', field(text, /^DATE\s*:\s*([^\n]+)/im));
+    return rows;
+  }
+
   push(
     rows,
     'Account Holder',

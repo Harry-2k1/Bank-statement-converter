@@ -34,7 +34,7 @@ export const BANKS = {
     label: 'Canara Bank',
     short: 'Canara',
     group: 'public',
-    description: 'Canara Bank current/savings and OD account statements.',
+    description: 'Canara Bank current/savings, passbook, and OD account statements.',
     accent: '#0084C7',
   },
   bob: {
