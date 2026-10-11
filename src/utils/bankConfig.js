@@ -26,7 +26,8 @@ export const BANKS = {
     label: 'Union Bank of India',
     short: 'Union Bank',
     group: 'public',
-    description: 'Union Bank of India account statement PDFs into Excel.',
+    description:
+      'Union Bank of India statements (auto-detects classic ledger and Details of Statement formats).',
     accent: '#0051A5',
   },
   canara: {

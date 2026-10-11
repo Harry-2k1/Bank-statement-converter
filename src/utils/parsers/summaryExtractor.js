@@ -420,10 +420,53 @@ export function extractAxisSummary(rawText) {
   return rows;
 }
 
+function labeledValue(text, label, multilineUntil) {
+  const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const patterns = [];
+  if (multilineUntil) {
+    patterns.push(
+      new RegExp(`(?:^|\\n)${escaped}\\n([\\s\\S]+?)(?=\\n${multilineUntil})`, 'i'),
+    );
+  }
+  patterns.push(
+    new RegExp(`(?:^|\\n)${escaped}\\n([^\\n]+)`, 'i'),
+    new RegExp(`(?:^|\\n)${escaped}${V}`, 'im'),
+  );
+  const value = field(text, patterns);
+  return value.replace(/\s+/g, ' ').trim();
+}
+
+function extractUnionBankDetailsSummary(rawText) {
+  const text = normalize(rawText);
+  const rows = [];
+
+  push(rows, 'Bank', 'Union Bank of India');
+  push(rows, 'Format', 'Details of Statement');
+  push(rows, 'Account Holder', labeledValue(text, 'Name'));
+  push(rows, 'Address', labeledValue(text, 'Address', 'Mobile No'));
+  push(rows, 'Mobile No', labeledValue(text, 'Mobile No'));
+  push(rows, 'Email ID', labeledValue(text, 'Email id'));
+  push(rows, 'Customer / CIF ID', labeledValue(text, 'Customer/CIF ID'));
+  push(rows, 'Account Type', labeledValue(text, 'Account Type'));
+  push(rows, 'Account Name', labeledValue(text, 'Account Name'));
+  push(rows, 'Account Number', labeledValue(text, 'Account Number'));
+  push(rows, 'Currency', labeledValue(text, 'Currency'));
+  push(rows, 'IFSC', labeledValue(text, 'IFSC'));
+  push(rows, 'Branch Address', labeledValue(text, 'Branch Address', 'Statement Date'));
+  push(rows, 'Statement Date', labeledValue(text, 'Statement Date'));
+  push(rows, 'Statement Period', labeledValue(text, 'Statement Period'));
+
+  return rows;
+}
+
 /**
  * Extract Union Bank of India statement header / account details for the Summary sheet.
  */
 export function extractUnionBankSummary(rawText) {
+  if (/Details of Statement/i.test(rawText) && /Transaction\s*Id/i.test(rawText)) {
+    return extractUnionBankDetailsSummary(rawText);
+  }
+
   const text = normalize(rawText);
   const rows = [];
 
