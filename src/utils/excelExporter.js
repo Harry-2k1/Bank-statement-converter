@@ -28,10 +28,9 @@ export function exportTransactionsToExcel({
   const sheet = XLSX.utils.aoa_to_sheet([header, ...data]);
 
   sheet['!cols'] = columns.map((col) => {
-    if (/narration|details|remarks|particulars/i.test(col.header)) return { wch: 56 };
+    if (/narration|details/i.test(col.header)) return { wch: 56 };
     if (/balance|withdrawal|deposit|debit|credit/i.test(col.header)) return { wch: 16 };
     if (/date/i.test(col.header)) return { wch: 12 };
-    if (/transaction id/i.test(col.header)) return { wch: 16 };
     if (/ref|chq/i.test(col.header)) return { wch: 22 };
     return { wch: 14 };
   });

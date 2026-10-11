@@ -20,11 +20,6 @@ import {
   parseUnionBankStatement,
   UNION_BANK_COLUMNS,
 } from './parsers/unionBankParser';
-import {
-  parseUnionBankDetailsStatement,
-  UNION_BANK_DETAILS_COLUMNS,
-  isUnionBankDetailsFormat,
-} from './parsers/unionBankDetailsParser';
 import { parseIciciStatement, ICICI_COLUMNS } from './parsers/iciciParser';
 import {
   parseIciciNewStatement,
@@ -208,35 +203,6 @@ const BANK_HANDLERS = {
   },
 };
 
-function resolveUnionConversion(text) {
-  if (isUnionBankDetailsFormat(text)) {
-    const rows = parseUnionBankDetailsStatement(text);
-    if (rows.length) {
-      return {
-        rows,
-        columns: UNION_BANK_DETAILS_COLUMNS,
-        summary: extractUnionBankSummary(text),
-      };
-    }
-  }
-
-  const classicRows = parseUnionBankStatement(text);
-  if (classicRows.length) {
-    return {
-      rows: classicRows,
-      columns: UNION_BANK_COLUMNS,
-      summary: extractUnionBankSummary(text),
-    };
-  }
-
-  const detailsRows = parseUnionBankDetailsStatement(text);
-  return {
-    rows: detailsRows,
-    columns: detailsRows.length ? UNION_BANK_DETAILS_COLUMNS : UNION_BANK_COLUMNS,
-    summary: extractUnionBankSummary(text),
-  };
-}
-
 function resolveIndianConversion(text) {
   if (isIndianBankActivityFormat(text)) {
     const rows = parseIndianBankActivityStatement(text);
@@ -376,11 +342,6 @@ export async function convertStatementPdf(file, bankId) {
         columns = resolved.columns;
       } else if (bankId === 'indian') {
         const resolved = resolveIndianConversion(text);
-        rows = resolved.rows;
-        summaryDetails = resolved.summary;
-        columns = resolved.columns;
-      } else if (bankId === 'union') {
-        const resolved = resolveUnionConversion(text);
         rows = resolved.rows;
         summaryDetails = resolved.summary;
         columns = resolved.columns;
