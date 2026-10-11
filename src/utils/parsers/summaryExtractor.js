@@ -423,7 +423,77 @@ export function extractAxisSummary(rawText) {
 /**
  * Extract Union Bank of India statement header / account details for the Summary sheet.
  */
+function labeledValue(text, label, multilineUntil) {
+  const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const patterns = [];
+  if (multilineUntil) {
+    patterns.push(
+      new RegExp(`(?:^|\\n)${escaped}\\n([\\s\\S]+?)(?=\\n${multilineUntil})`, 'i'),
+    );
+  }
+  patterns.push(
+    new RegExp(`(?:^|\\n)${escaped}\\n([^\\n]+)`, 'i'),
+    new RegExp(`(?:^|\\n)${escaped}${V}`, 'im'),
+    new RegExp(`${escaped}\\s+([^\\n]+)`, 'i'),
+  );
+  const value = field(text, patterns);
+  return value.replace(/\s+/g, ' ').trim();
+}
+
+function extractUnionBankDetailsSummary(rawText) {
+  const text = normalize(rawText);
+  const rows = [];
+
+  push(rows, 'Bank', 'Union Bank of India');
+  push(rows, 'Format', 'Details of Statement');
+  push(
+    rows,
+    'Account Holder',
+    field(text, /Name\s+([^\n]+?)(?:\s+Customer\/CIF ID)/i) ||
+      labeledValue(text, 'Name'),
+  );
+  push(
+    rows,
+    'Address',
+    field(text, /Address\s+([^\n]+?)(?:\s+MECHERI|\s+Mobile No)/i) ||
+      labeledValue(text, 'Address', 'Mobile No'),
+  );
+  push(
+    rows,
+    'Mobile No',
+    field(text, /Mobile No\s+([^\n]+?)(?:\s+Account Number)/i) ||
+      labeledValue(text, 'Mobile No'),
+  );
+  push(rows, 'Email ID', field(text, /Email id\s+([^\n]+?)(?:\s+IFSC)/i));
+  push(rows, 'Customer / CIF ID', field(text, /Customer\/CIF ID\s+(\d+)/i));
+  push(
+    rows,
+    'Account Type',
+    field(text, /Account Type\s+([^\n]+?)(?:\s+Address|\s+Account Name)/i),
+  );
+  push(rows, 'Account Name', field(text, /Account Name\s+([^\n]+?)(?:\s+Mobile No)/i));
+  push(rows, 'Account Number', field(text, /Account Number\s+(\d+)/i));
+  push(rows, 'Currency', field(text, /Currency\s+([A-Z]{3})/i));
+  push(rows, 'IFSC', field(text, /IFSC\s+([A-Z0-9]+)/i));
+  push(
+    rows,
+    'Branch Address',
+    field(text, /Branch Address\s+([^\n]+?)(?:\s+Statement Date)/i),
+  );
+  push(rows, 'Statement Date', field(text, /Statement Date\s+([^\n]+)/i));
+  push(rows, 'Statement Period', field(text, /Statement Period\s+([^\n]+)/i));
+
+  return rows;
+}
+
+/**
+ * Extract Union Bank of India statement header / account details for the Summary sheet.
+ */
 export function extractUnionBankSummary(rawText) {
+  if (/Details of Statement/i.test(rawText) && /Current Account/i.test(rawText)) {
+    return extractUnionBankDetailsSummary(rawText);
+  }
+
   const text = normalize(rawText);
   const rows = [];
 
