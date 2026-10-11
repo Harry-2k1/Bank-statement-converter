@@ -1,6 +1,6 @@
 const TXN_DATE_RE = /^(\d{2}-\d{2}-\d{4})\s*(.*)$/;
 const FOOTER_RE =
-  /\s(RTGS|IMPS|UPI|TRF|NEFT|ATM|POS|MB|FT|SBINT|CHRG|ECS|ACH|CLG|INT|REV|TDS|EFT)\s+(\d{2}-\d{2}-\d{4})\s+([\d,]+\.\d{2})\s+([\d,]+\.\d{2})\s+CR\s+(\S+)\s*$/i;
+  /(?:^|\s)(RTGS|IMPS|UPI|TRF|NEFT|ATM|POS|MB|FT|SBINT|CHRG|ECS|ACH|CLG|INT|REV|TDS|EFT|CASH)\s+(\d{2}-\d{2}-\d{4})\s+([\d,]+\.\d{2})\s+([\d,]+\.\d{2})\s+CR\s+(\S+)(?:\s+\S+)?\s*$/i;
 const OPENING_BALANCE_RE = /^Opening Balance\s+CR\s+([\d,]+\.\d{2})/i;
 const PAGE_FOOTER_RE = /\sPage \d+ of \d+.*$/i;
 const END_MATTER_RE = /\sAbbreviations Used:.*$/i;
@@ -88,6 +88,7 @@ function isTxnDateLine(line) {
   const match = line.match(TXN_DATE_RE);
   if (!match) return false;
   if (/^\d{2}-\d{2}-\d{4}\s+\d{1,2}:\d{2}/.test(line)) return false;
+  if (/^\d{2}-\d{2}-\d{4}\s*:\s*/.test(line)) return false;
   return true;
 }
 
@@ -134,14 +135,14 @@ function classifyMovement(particulars, movement, balance, prevBalance) {
 
   const upper = particulars.toUpperCase();
   if (
-    /^UPI IN|^IMPS CREDIT|^FT IMPS|^NEFT-|^NFT\/|^ACHCR|^SBINT:|^RTN:|^EFT\//i.test(upper)
+    /^UPI IN|^IMPS CREDIT|^FT IMPS|^NEFT-|^NFT\/|^ACHCR|^SBINT:|^RTN:|^EFT\/|^TFR:/i.test(upper)
   ) {
     return { debit: null, credit: movement };
   }
   if (/^UPIOUT|^TO ATM|^TO CBDT|^RTG\/P|^MB IMPS|^POS\/|^CHRG|^TDS|^NFT\//i.test(upper)) {
     return { debit: movement, credit: null };
   }
-  if (/^FT IMPS\/IFI/i.test(upper)) {
+  if (/^FT IMPS\/IFI|^CASH:/i.test(upper)) {
     return { debit: null, credit: movement };
   }
 
